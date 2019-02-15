@@ -1,0 +1,19 @@
+{
+  "name": "mediaflo-encoder-worker",
+  "version": "1.0.0",
+  "description": "Worker is responsible for claiming encoding jobs from a MySQL table, encoding them, and recording progress back to MySQL",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/txstate-etc/mediaflo-encoder.git"
+  },
+  "author": "Nick Wing",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/txstate-etc/mediaflo-encoder/issues"
+  },
+  "homepage": "https://github.com/txstate-etc/mediaflo-encoder#readme"
+}

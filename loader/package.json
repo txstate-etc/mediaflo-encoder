@@ -1,0 +1,19 @@
+{
+  "name": "mediaflo-encoder-loader",
+  "version": "1.0.0",
+  "description": "Loader handles requests from Mediaflo, places jobs in MySQL for workers, and reports progress to Mediaflo",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/txstate-etc/mediaflo-encoder.git"
+  },
+  "author": "Jeff Snider",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/txstate-etc/mediaflo-encoder/issues"
+  },
+  "homepage": "https://github.com/txstate-etc/mediaflo-encoder#readme"
+}
