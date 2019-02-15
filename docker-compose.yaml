@@ -1,0 +1,22 @@
+version: '3'
+services:
+  worker:
+    build:
+      context: ./worker
+    environment:
+      NODE_ENV: development
+    ports:
+      - 80:80
+    links:
+      - mariadb
+    volumes:
+      - ./worker/index.js:/usr/src/app/index.js
+  mariadb:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+    volumes:
+      - mediafloencoderdb:/data/db
+volumes:
+  mediafloencoderdb: {}
