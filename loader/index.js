@@ -4,7 +4,7 @@ const app = service.app
 const migrate = require('./lib/migrate')
 
 app.get('/', async (req, res) => {
-  await db.insert('INSERT INTO queue(job_created, source_path, dest_path, resolution) VALUES (NOW(), ?, ?, ?)',
+  await db.insert('INSERT INTO queue(source_path, dest_path, resolution) VALUES (?, ?, ?)',
     'source', 'dest', 480)
   res.send('Done!')
 })
