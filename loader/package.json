@@ -4,6 +4,7 @@
   "description": "Loader handles requests from Mediaflo, places jobs in MySQL for workers, and reports progress to Mediaflo",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "test"
   },
   "repository": {
@@ -15,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/txstate-etc/mediaflo-encoder/issues"
   },
-  "homepage": "https://github.com/txstate-etc/mediaflo-encoder#readme"
+  "homepage": "https://github.com/txstate-etc/mediaflo-encoder#readme",
+  "dependencies": {
+    "txstate-node-utils": "^2.1.7"
+  }
 }

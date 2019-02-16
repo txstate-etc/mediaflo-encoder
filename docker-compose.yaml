@@ -1,13 +1,24 @@
 version: '3'
 services:
+  loader:
+    build:
+      context: ./loader
+    environment:
+      NODE_ENV: development
+      DB_HOST: mariadb
+    ports:
+      - 80:80
+    links:
+      - mariadb
+    volumes:
+      - ./loader/index.js:/usr/src/app/index.js
+      - ./loader/lib:/usr/src/app/lib
   worker:
     build:
       context: ./worker
     environment:
       NODE_ENV: development
       DB_HOST: mariadb
-    ports:
-      - 80:80
     links:
       - mariadb
     volumes:
@@ -17,3 +28,4 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: default_database
