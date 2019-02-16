@@ -5,6 +5,7 @@ services:
       context: ./worker
     environment:
       NODE_ENV: development
+      DB_HOST: mariadb
     ports:
       - 80:80
     links:
@@ -16,7 +17,3 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: secret
-    volumes:
-      - mediafloencoderdb:/data/db
-volumes:
-  mediafloencoderdb: {}
