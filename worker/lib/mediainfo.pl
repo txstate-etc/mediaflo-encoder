@@ -88,7 +88,7 @@ foreach my $sub (@{$dom->find('track[type="Text"]')}) {
   push (@{$ret->{text}}, $entry);
 }
 
-print JSON::XS->new->pretty(1)->canonical(1)->utf8->encode($ret) . "\n";
+print JSON->new->pretty(1)->canonical(1)->utf8->encode($ret) . "\n";
 
 sub shortest {
   my $element = shift;

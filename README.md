@@ -10,7 +10,7 @@ Loader and Worker must agree on a set of columns in MySQL:
 * dest_path: text
 * resolution: unsigned smallint (240,480,720,1080,2160)
 * encoding_started: datetime (UTC)
-* percent_complete: decimal(3,2)
+* percent_complete: decimal(5,2)
 
 # Notes
 * Loader is responsible for creating the database and managing table schemas
