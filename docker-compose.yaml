@@ -23,6 +23,8 @@ services:
       - mariadb
     volumes:
       - ./worker/index.js:/usr/src/app/index.js
+      - ./sample_src:/video_src
+      - ./sample_dest:/video_dest
   mariadb:
     image: mariadb
     restart: always

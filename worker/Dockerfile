@@ -54,5 +54,6 @@ COPY --from=handbrake /tmp/HandBrake/build/HandBrakeCLI /HandBrakeCLI
 COPY package.json ./
 RUN npm install --quiet --production
 COPY index.js index.js
+COPY lib lib
 
 CMD ["npm", "start"]
