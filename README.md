@@ -2,11 +2,13 @@
 
 Loader and Worker must agree on a set of columns in MySQL:
 
+* table name "queue"
+* id: unsigned int (autoincrement)
 * job_created: datetime
 * status: enum('waiting','working','success','error')
 * source_path: text
 * dest_path: text
-* resolution: smallint (240,480,720,1080,2160)
+* resolution: unsigned smallint (240,480,720,1080,2160)
 * encoding_started: datetime (UTC)
 * percent_complete: decimal(3,2)
 
