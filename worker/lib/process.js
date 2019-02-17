@@ -1,6 +1,7 @@
 const childprocess = require('child_process')
 const util = require('util')
 const exec = util.promisify(childprocess.exec)
+const fsp = require('fs').promises
 const db = require('txstate-node-utils/lib/mysql')
 
 function nearest16 (num) {
@@ -53,6 +54,7 @@ module.exports = async (job) => {
       '-a none --no-markers --detelecine --vfr ' +
       '--start-at duration:' + startat + ' --stop-at duration:3')
     const testinfo = await mediainfo(testpath)
+    await fsp.unlink(testpath)
     if (testinfo.video.fps < 26.0) {
       finalfps = 23.976
       detelecine = true
