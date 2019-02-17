@@ -9,25 +9,68 @@ function nearest16 (num) {
   return 16 + num - num % 16
 }
 
+function normalizefps (fps) {
+  if (!fps) return 30
+  if (fps < 22 || fps > 64 || [23.976, 24, 29.97, 30, 59.94, 60].includes(fps)) return fps
+  if (fps < 26) return 23.976
+  if (fps < 34) return 29.97
+  if (fps < 55) return fps
+  return 59.97
+}
+
+async function mediainfo (path) {
+  const output = await exec(`perl /usr/src/app/lib/mediainfo.pl "${path}"`)
+  return JSON.parse(output.stdout)
+}
+
 module.exports = async (job) => {
   const inputpath = '/video_src/' + job.source_path
   const outputpath = '/video_dest/' + job.dest_path
-  const output = await exec(`perl /usr/src/app/lib/mediainfo.pl "${inputpath}"`)
-  const info = JSON.parse(output.stdout)
+  const info = await mediainfo(inputpath)
   const targetheight = job.resolution
   const targetwidth = targetheight * 1.7778
-  const wide = 1.0 * info.video.display_width / info.video.display_height > 1.7778
+  const wide = 1.0 * info.displayratio > 1.7778
   const finalwidth = nearest16(wide ? targetwidth : targetheight * 1.7778)
   const finalheight = nearest16(wide ? targetwidth / 1.7778 : targetheight)
+  let finalfps = normalizefps(info.video.fps)
+
+  // if video is interlaced, let's figure out whether it is a true interlace or actually a telecine
+  // telecine means we should --detelecine and set framerate to 23.976
+  // true interlace was recorded at 60i; we'll get best quality if we convert to 60p
+  //
+  // HandBrake can help us tell the difference if we set it to detelecine with variable frame rate
+  // on a telecine video, it will discard every 5th frame and the output video will be near 24fps
+  // on a true interlaced video, it will not discard frames and will be near 30fps
+  let detelecine = false
+  let deinterlace = false
+  if (info.video.interlaced && Math.round(info.video.fps) === 30) {
+    const testpath = '/tmp/' + job.source_path
+    const startat = Math.min(Math.floor(info.duration / 2.0), 60)
+    await exec('/HandBrakeCLI -i "' + inputpath + '" -o "' + testpath + '" -f mp4 -m --optimize ' +
+      '--custom-anamorphic --pixel-aspect 1:1 -w 200 -l 200 -e x264 -q 30 ' +
+      '--crop 0:0:0:0 ' +
+      '-x "ref=3:weightp=0:b-pyramid=strict:b-adapt=2:me=umh:subme=6:rc-lookahead=40" ' +
+      '-a none --no-markers --detelecine --vfr ' +
+      '--start-at duration:' + startat + ' --stop-at duration:3')
+    const testinfo = await mediainfo(testpath)
+    if (testinfo.video.fps < 26.0) {
+      finalfps = 23.976
+      detelecine = true
+    } else {
+      finalfps = normalizefps(info.video.fps * 2.0)
+      deinterlace = true
+    }
+  }
 
   await db.update('UPDATE queue SET encoding_started=NOW() WHERE id=?', job.id)
   const child = childprocess.spawn('/HandBrakeCLI', [
     '-i', inputpath, '-o', outputpath,
     '-f', 'mp4', '-m', '--optimize',
-    '--custom-anamorphic', '--pixel-aspect', '1:1',
-    '-w', finalwidth, '-l', finalheight,
+    '--custom-anamorphic', '--pixel-aspect', '1:1', '--crop', '0:0:0:0',
+    '-w', finalwidth, '-l', finalheight, '--cfr', '--rate', finalfps,
+    ...(detelecine ? ['--detelecine'] : []), ...(deinterlace ? ['--deinterlace=bob'] : []),
     '-e', 'x264', '-q', '20', '-x', 'ref=3:weightp=0:b-pyramid=strict:b-adapt=2:me=umh:subme=7:rc-lookahead=40',
-    '-a', '1', '-E', 'fdk_aac', '--aq', '2', '6', 'dpl2',
+    '-a', '1', '-E', 'fdk_aac', '--aq', '2', '-6', 'dpl2',
     '--no-markers'
   ])
 
