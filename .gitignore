@@ -64,3 +64,5 @@ typings/
 .DS_Store
 /sample_dest/*
 !/sample_dest/.gitkeep
+/sample_src/*
+!/sample_src/testvideo.mp4
