@@ -10,10 +10,11 @@ async function getajob () {
       console.log('I got a job!', job.id)
       try {
         await processjob(job)
-        console.log('finished processing job', job)
-        await db.update('UPDATE queue SET status="success" WHERE id=?', job.id)
+        await db.update('UPDATE queue SET encoding_completed=NOW(), status="success" WHERE id=?', job.id)
+        const finaljob = await db.getrow('SELECT * FROM queue WHERE id=?', job.id)
+        console.log('finished processing job', finaljob)
       } catch (error) {
-        await db.update('UPDATE queue SET status="error" WHERE id=?', job.id)
+        await db.update('UPDATE queue SET encoding_completed=NOW(), status="error" WHERE id=?', job.id)
         throw error
       }
     }

@@ -3,6 +3,7 @@ const util = require('util')
 const exec = util.promisify(childprocess.exec)
 const fsp = require('fs').promises
 const db = require('txstate-node-utils/lib/mysql')
+const copy = require('cp-file')
 
 function nearest16 (num) {
   num = Math.round(num)
@@ -33,7 +34,15 @@ module.exports = async (job) => {
   const wide = 1.0 * info.displayratio > 1.7778
   const finalwidth = nearest16(wide ? targetwidth : targetheight * 1.7778)
   const finalheight = nearest16(wide ? targetwidth / 1.7778 : targetheight)
-  let finalfps = normalizefps(info.video.fps)
+  const finalarea = finalwidth * finalheight
+  const originalarea = info.video.display_width * info.video.display_height
+
+  // return error if an upscale was requested
+  if (finalarea > originalarea * 1.1) {
+    throw new Error('Upscaling videos is not supported.')
+  } else {
+    await db.update('UPDATE queue SET final_width=?, final_height=? WHERE id=?', finalwidth, finalheight, job.id)
+  }
 
   // if video is interlaced, let's figure out whether it is a true interlace or actually a telecine
   // telecine means we should --detelecine and set framerate to 23.976
@@ -42,6 +51,7 @@ module.exports = async (job) => {
   // HandBrake can help us tell the difference if we set it to detelecine with variable frame rate
   // on a telecine video, it will discard every 5th frame and the output video will be near 24fps
   // on a true interlaced video, it will not discard frames and will be near 30fps
+  let finalfps = normalizefps(info.video.fps)
   let detelecine = false
   let deinterlace = false
   if (info.video.interlaced && Math.round(info.video.fps) === 30) {
@@ -65,32 +75,43 @@ module.exports = async (job) => {
   }
 
   await db.update('UPDATE queue SET encoding_started=NOW() WHERE id=?', job.id)
-  const child = childprocess.spawn('/HandBrakeCLI', [
-    '-i', inputpath, '-o', outputpath,
-    '-f', 'mp4', '-m', '--optimize',
-    '--custom-anamorphic', '--pixel-aspect', '1:1', '--crop', '0:0:0:0',
-    '-w', finalwidth, '-l', finalheight, '--cfr', '--rate', finalfps,
-    ...(detelecine ? ['--detelecine'] : []), ...(deinterlace ? ['--deinterlace=bob'] : []),
-    '-e', 'x264', '-q', '20', '-x', 'ref=3:weightp=0:b-pyramid=strict:b-adapt=2:me=umh:subme=7:rc-lookahead=40',
-    '-a', '1', '-E', 'fdk_aac', '--aq', '2', '-6', 'dpl2',
-    '--no-markers'
-  ])
+  // determine whether encoding is necessary
+  if (detelecine || deinterlace || info.format !== 'mp4' ||
+      info.audio.length > 1 || info.audio[0].format !== 'aac' ||
+      !info.streamable || info.video.format !== 'h264' ||
+      info.video.bps > 10000000 * (finalarea / (1280 * 720.0))) {
+    // encoding is necessary
+    const child = childprocess.spawn('/HandBrakeCLI', [
+      '-i', inputpath, '-o', outputpath,
+      '-f', 'mp4', '-m', '--optimize',
+      '--custom-anamorphic', '--pixel-aspect', '1:1', '--crop', '0:0:0:0',
+      '-w', finalwidth, '-l', finalheight, '--cfr', '--rate', finalfps,
+      ...(detelecine ? ['--detelecine'] : []), ...(deinterlace ? ['--deinterlace=bob'] : []),
+      '-e', 'x264', '-q', '20', '-x', 'ref=3:weightp=0:b-pyramid=strict:b-adapt=2:me=umh:subme=7:rc-lookahead=40',
+      '-a', '1', '-E', 'fdk_aac', '--aq', '2', '-6', 'dpl2',
+      '--no-markers'
+    ])
 
-  return new Promise((resolve, reject) => {
-    child.stdout.on('data', chunk => {
-      const line = chunk.toString('utf8')
-      const m = line.match(/(\d+\.\d+)\s?%/i)
-      if (Array.isArray(m) && m[0]) {
-        const progress = parseFloat(m[0])
-        db.update('UPDATE queue SET percent_complete=? WHERE id=?', progress, job.id).catch(err => console.log(err))
-      }
+    return new Promise((resolve, reject) => {
+      child.stdout.on('data', chunk => {
+        const line = chunk.toString('utf8')
+        const m = line.match(/(\d+\.\d+)\s?%/i)
+        if (Array.isArray(m) && m[0]) {
+          const progress = parseFloat(m[0])
+          db.update('UPDATE queue SET percent_complete=? WHERE id=?', progress, job.id).catch(err => console.log(err))
+        }
+      })
+      child.stderr.on('data', chunk => {
+        // debug info, unnecessary for now
+      })
+      child.on('close', (code) => {
+        if (code) reject(new Error('HandBrake returned failure code.'))
+        else resolve()
+      })
     })
-    child.stderr.on('data', chunk => {
-      // debug info, unnecessary for now
+  } else {
+    return copy(inputpath, outputpath).on('progress', info => {
+      db.update('UPDATE queue SET percent_complete=? WHERE id=?', info.percent * 100.0, job.id)
     })
-    child.on('close', (code) => {
-      if (code) reject(new Error('HandBrake returned failure code.'))
-      else resolve()
-    })
-  })
+  }
 }

@@ -19,6 +19,7 @@ my $gen = $dom->find('track[type="General"]')->first;
 $ret->{duration} = numeric($gen, 'Duration');
 $ret->{bps} = numeric($gen, 'OverallBitRate');
 $ret->{format} = lc(shortest($gen, 'FileExtension'));
+$ret->{streamable} = boolean($gen, 'IsStreamable');
 $ret->{chapters} = [];
 my $menus = $dom->find('track[type="Menu"] extra');
 if (scalar @$menus > 0) {

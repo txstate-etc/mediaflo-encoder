@@ -10,7 +10,10 @@ module.exports = async function () {
       source_path TEXT NOT NULL,
       dest_path TEXT NOT NULL,
       resolution SMALLINT UNSIGNED NOT NULL,
+      final_width SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+      final_height SMALLINT UNSIGNED NOT NULL DEFAULT 0,
       encoding_started DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      encoding_completed DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       percent_complete DECIMAL(5,2) NOT NULL DEFAULT 0.0,
       PRIMARY KEY (id),
       INDEX status (status(12))
