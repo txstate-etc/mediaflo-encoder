@@ -3,11 +3,13 @@ const db = require('txstate-node-utils/lib/mysql')
 const app = service.app
 const migrate = require('./lib/migrate')
 
-app.get('/', async (req, res) => {
-  await db.insert('INSERT INTO queue(source_path, dest_path, resolution) VALUES (?, ?, ?)',
-    'testvideo.mp4', 'testvideo.mp4', 480)
-  res.send('Done!')
-})
+// health check
+app.get('/api/?$', (req, res) => {
+	res.status(200).send("OK");
+});
+
+app.use('/api/presets', require('./routes/presets.js'));
+app.use('/api/jobs', require('./routes/jobs.js'));
 
 migrate().then(async () => {
   await service.start()

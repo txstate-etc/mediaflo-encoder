@@ -18,6 +18,9 @@
   },
   "homepage": "https://github.com/txstate-etc/mediaflo-encoder#readme",
   "dependencies": {
-    "txstate-node-utils": "^2.1.10"
+	"txstate-node-utils": "^2.1.10",
+	"xml2js": "^0.4.19",
+	"xmlbuilder": "^11.0.0",
+	"body-parser": "^1.18.3"
   }
 }

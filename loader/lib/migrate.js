@@ -4,9 +4,9 @@ module.exports = async function () {
   await db.execute(`DROP TABLE IF EXISTS queue`)
   await db.execute(`
     CREATE TABLE IF NOT EXISTS queue (
-      id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+      id VARCHAR(40) NOT NULL,
       job_created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      status TINYTEXT NOT NULL DEFAULT 'waiting',
+      status VARCHAR(40) NOT NULL DEFAULT 'waiting',
       source_path TEXT NOT NULL,
       dest_path TEXT NOT NULL,
       resolution SMALLINT UNSIGNED NOT NULL,
