@@ -3,14 +3,17 @@
 Loader and Worker must agree on a set of columns in MySQL:
 
 * table name "queue"
-* id: varchar *A GUID*
+* id: varchar (will be a GUID)
 * name: varchar
-* job_created: datetime
+* job_created: datetime (UTC)
 * status: enum('waiting','working','success','error')
 * source_path: text
 * dest_path: text
 * resolution: unsigned smallint (240,480,720,1080,2160)
+* final_width: unsigned smallint
+* final_height: unsigned smallint
 * encoding_started: datetime (UTC)
+* encoding_completed: datetime (UTC)
 * percent_complete: decimal(5,2)
 
 # Notes
