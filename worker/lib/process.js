@@ -77,6 +77,7 @@ module.exports = async (job) => {
   await db.update('UPDATE queue SET encoding_started=NOW() WHERE id=?', job.id)
   // determine whether encoding is necessary
   if (detelecine || deinterlace || info.format !== 'mp4' ||
+      finalarea * 1.3 < originalarea ||
       info.audio.length > 1 || info.audio[0].format !== 'aac' ||
       !info.streamable || info.video.format !== 'h264' ||
       info.video.bps > 10000000 * (finalarea / (1280 * 720.0))) {
