@@ -26,8 +26,8 @@ async function mediainfo (path) {
 }
 
 module.exports = async (job) => {
-  const inputpath = '/video_src/' + job.source_path
-  const outputpath = '/video_dest/' + job.dest_path
+  const inputpath = job.source_path
+  const outputpath = job.dest_path
   const info = await mediainfo(inputpath)
   const targetheight = job.resolution
   const targetwidth = targetheight * 1.7778

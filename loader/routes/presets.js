@@ -29,9 +29,4 @@ router.get('/info/:id', (req, res) => {
 });
 
 
-
-
-
-
-
 module.exports = router;

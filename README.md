@@ -3,7 +3,8 @@
 Loader and Worker must agree on a set of columns in MySQL:
 
 * table name "queue"
-* id: unsigned int (autoincrement)
+* id: varchar *A GUID*
+* name: varchar
 * job_created: datetime
 * status: enum('waiting','working','success','error')
 * source_path: text
@@ -17,4 +18,3 @@ Loader and Worker must agree on a set of columns in MySQL:
 * Loader is responsible for cleaning old jobs from MySQL if necessary
 * Worker will return an error when a significant upscale is requested
 * Worker will copy the file from source to dest when the source file is acceptable for the given resolution
-
