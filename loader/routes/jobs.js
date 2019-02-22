@@ -63,9 +63,10 @@ router.get('/status/:id/$', async (req, res) => {
     error: 'Error'
   }
   status.ele('Status').text(statusmap[job.status])
+  if (job.status === 'error') {
+    status.ele('StatusMessage').text(job.error)
+  }
   root.ele('TimeSubmitted').text(job.job_created.toISOString())
-
-  console.log(root.end({ pretty: true }))
 
   res.status(200).contentType('application/xml').send(root.end({ pretty: true }))
 })

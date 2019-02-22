@@ -14,7 +14,7 @@ async function getajob () {
         const finaljob = await db.getrow('SELECT * FROM queue WHERE id=?', job.id)
         console.log('finished processing job', finaljob)
       } catch (error) {
-        await db.update('UPDATE queue SET encoding_completed=NOW(), status="error" WHERE id=?', job.id)
+        await db.update('UPDATE queue SET encoding_completed=NOW(), status="error", error=? WHERE id=?', error.toString(), job.id)
         throw error
       }
     }
