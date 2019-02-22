@@ -4,6 +4,7 @@ const xmlbuilder = require('xmlbuilder')
 const bodyparser = require('body-parser')
 const xmlparsestring = require('../lib/xml-parsepromise.js')
 const db = require('txstate-node-utils/lib/mysql')
+const ensembledb = require('../lib/ensembledb.js')
 const uuidv4 = require('uuid/v4')
 
 var router = express.Router()
@@ -46,6 +47,10 @@ router.get('/status/:id/$', async (req, res) => {
   if (!job) {
     res.status(404).send()
     return
+  }
+
+  if (job.status === 'error' && job.error.match(/Upscaling videos is not supported/)) {
+    await ensembledb.dropencodingforjob(req.params.id)
   }
 
   var root = xmlbuilder.create('JobStatusInfo')

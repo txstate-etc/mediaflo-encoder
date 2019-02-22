@@ -23,6 +23,7 @@
     "xmlbuilder": "^11.0.0",
     "body-parser": "^1.18.3",
     "express-basic-auth": "^1.1.6",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "mssql": "^4.3.2"
   }
 }
