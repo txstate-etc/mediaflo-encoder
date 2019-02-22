@@ -1,26 +1,26 @@
 [
-	{
-		"id": "4f5bcb0e-32a9-41e9-b918-03d54a7c4be4",
-		"created": "2019-02-18T00:00:00",
-		"name": "Handbrake 360px",
-		"height": 360
-	},
-	{
-		"id": "18e9cd56-9e88-4ecf-b70c-416327af605c",
-		"created": "2019-02-18T00:00:00",
-		"name": "Handbrake 480px",
-		"height": 480
-	},
-	{
-		"id": "ac5065c6-389b-47f8-81f5-35aa7ba2a5d5",
-		"created": "2019-02-18T00:00:00",
-		"name": "Handbrake 720px",
-		"height": 720
-	},
-	{
-		"id": "519c4c71-63c6-4a84-8639-e75c5c863dbd",
-		"created": "2019-02-18T00:00:00",
-		"name": "Handbrake 1080px",
-		"height": 1080
-	}
+  {
+    "id": "4f5bcb0e-32a9-41e9-b918-03d54a7c4be4",
+    "created": "2019-02-18T00:00:00",
+    "name": "Handbrake 360px",
+    "height": 360
+  },
+  {
+    "id": "18e9cd56-9e88-4ecf-b70c-416327af605c",
+    "created": "2019-02-18T00:00:00",
+    "name": "Handbrake 480px",
+    "height": 480
+  },
+  {
+    "id": "ac5065c6-389b-47f8-81f5-35aa7ba2a5d5",
+    "created": "2019-02-18T00:00:00",
+    "name": "Handbrake 720px",
+    "height": 720
+  },
+  {
+    "id": "519c4c71-63c6-4a84-8639-e75c5c863dbd",
+    "created": "2019-02-18T00:00:00",
+    "name": "Handbrake 1080px",
+    "height": 1080
+  }
 ]
