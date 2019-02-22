@@ -1,12 +1,11 @@
 const db = require('txstate-node-utils/lib/mysql')
 
 module.exports = async function () {
-  return;
   await db.execute(`DROP TABLE IF EXISTS queue`)
   await db.execute(`
     CREATE TABLE IF NOT EXISTS queue (
-	  id VARCHAR(40) NOT NULL,
-	  name VARCHAR(255) NOT NULL,
+      id VARCHAR(40) NOT NULL,
+      name VARCHAR(255) NOT NULL,
       job_created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       status VARCHAR(40) NOT NULL DEFAULT 'waiting',
       source_path TEXT NOT NULL,
