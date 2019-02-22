@@ -41,7 +41,7 @@ module.exports = async (job) => {
   const originalarea = info.video.display_width * info.video.display_height
 
   // return error if an upscale was requested
-  if (finalarea > originalarea * 1.3) {
+  if (finalarea > originalarea * 1.3 && targetheight !== 360) {
     throw new Error('Upscaling videos is not supported.')
   } else {
     await db.update('UPDATE queue SET final_width=?, final_height=? WHERE id=?', finalwidth, finalheight, job.id)
