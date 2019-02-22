@@ -5,7 +5,7 @@ const populatePresetXML = require('../lib/preset-generatexml.js')
 
 var router = express.Router()
 
-router.get('/info/?$', (req, res) => {
+router.get('/info/?$', async (req, res) => {
   var root = xmlbuilder.create('PresetInfoList')
   root.att('xmlns:i', 'http://www.w3.org/2001/XMLSchema-instance')
 
@@ -17,7 +17,7 @@ router.get('/info/?$', (req, res) => {
   res.status(200).contentType('application/xml').send(root.end({ pretty: true }))
 })
 
-router.get('/info/:id', (req, res) => {
+router.get('/info/:id', async (req, res) => {
   var root = xmlbuilder.create('PresetInfo')
   root.att('xmlns:i', 'http://www.w3.org/2001/XMLSchema-instance')
 

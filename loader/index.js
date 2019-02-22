@@ -4,7 +4,7 @@ const migrate = require('./lib/migrate')
 const expressbasicauth = require('express-basic-auth')
 
 // health check
-app.get('/api/?$', (req, res) => {
+app.get('/api/?$', async (req, res) => {
   res.status(200).send('OK')
 })
 
