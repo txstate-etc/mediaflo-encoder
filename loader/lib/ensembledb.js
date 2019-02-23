@@ -9,13 +9,13 @@ class Db {
       user: process.env.ENSEMBLEDB_USER || 'ensemble',
       password: process.env.ENSEMBLEDB_PASS || 'secret',
       database: process.env.ENSEMBLEDB_DATABASE || 'default_database'
-    }).connect()
+    })
   }
 
   async wait () {
     while (true) {
       try {
-        await this.pool
+        await this.pool.connect()
         return
       } catch (error) {
         // sleep and try again
