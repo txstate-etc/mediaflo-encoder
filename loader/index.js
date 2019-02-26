@@ -9,11 +9,9 @@ app.get('/api/?$', async (req, res) => {
   res.status(200).send('OK')
 })
 
-app.use(expressbasicauth({
-  users: {
-    'SqueezeAdmin': process.env.API_PASS || 'changeme'
-  }
-}))
+const basicauthusers = {}
+basicauthusers[process.env.API_USER] = process.env.API_PASS
+app.use(expressbasicauth({ users: basicauthusers }))
 
 app.use('/api/presets', require('./routes/presets.js'))
 app.use('/api/jobs', require('./routes/jobs.js'))
