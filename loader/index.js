@@ -10,7 +10,7 @@ app.get('/api/?$', async (req, res) => {
 })
 
 const basicauthusers = {}
-basicauthusers[process.env.API_USER] = process.env.API_PASS
+basicauthusers[process.env.API_USER || 'apiuser'] = process.env.API_PASS || 'secret'
 app.use(expressbasicauth({ users: basicauthusers }))
 
 app.use('/api/presets', require('./routes/presets.js'))
