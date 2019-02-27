@@ -4,6 +4,8 @@
 
 ### MySQL
 
+These details should match those from the [Worker](../worker/).
+
 * `DB_HOST` -- Hostname of the MySQL database that holds the encode queue. *Defaults to `mysql`.*
 * `DB_USER` -- Username to connect to MySQL as. *Defaults to `root`, but seriously, don't do that.*
 * `DB_PASS` -- Password to connect to MySQL as. *Defaults to `secret`.*
