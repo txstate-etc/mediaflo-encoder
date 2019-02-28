@@ -60,14 +60,18 @@ module.exports = async (job) => {
   if (info.video.interlaced && Math.round(info.video.fps) === 30) {
     const testpath = '/tmp/' + job.source_path
     const startat = Math.min(Math.floor(info.duration / 2.0), 60)
-    await exec('/HandBrakeCLI -i "' + inputpath + '" -o "' + testpath + '" -f mp4 -m --optimize ' +
-      '--custom-anamorphic --pixel-aspect 1:1 -w 200 -l 200 -e x264 -q 30 ' +
-      '--crop 0:0:0:0 ' +
-      '-x "ref=3:weightp=0:b-pyramid=strict:b-adapt=2:me=umh:subme=6:rc-lookahead=40" ' +
-      '-a none --no-markers --detelecine --vfr ' +
-      '--start-at duration:' + startat + ' --stop-at duration:3')
-    const testinfo = await mediainfo(testpath)
-    await fsp.unlink(testpath)
+    let testinfo
+    try {
+      await exec('/HandBrakeCLI -i "' + inputpath + '" -o "' + testpath + '" -f mp4 -m --optimize ' +
+        '--custom-anamorphic --pixel-aspect 1:1 -w 200 -l 200 -e x264 -q 30 ' +
+        '--crop 0:0:0:0 ' +
+        '-x "ref=3:weightp=0:b-pyramid=strict:b-adapt=2:me=umh:subme=6:rc-lookahead=40" ' +
+        '-a none --no-markers --detelecine --vfr ' +
+        '--start-at duration:' + startat + ' --stop-at duration:3')
+      testinfo = await mediainfo(testpath)
+    } finally {
+      await fsp.unlink(testpath)
+    }
     if (testinfo.video.fps < 26.0) {
       finalfps = 23.976
       detelecine = true
