@@ -32,8 +32,8 @@ module.exports = async (job) => {
   const targetheight = job.resolution
   const targetwidth = targetheight * 1.7778
   const wide = 1.0 * info.video.displayratio > 1.7778
-  let finalwidth = nearest16(wide ? targetwidth : targetheight * 1.7778)
-  let finalheight = nearest16(wide ? targetwidth / 1.7778 : targetheight)
+  let finalwidth = nearest16(wide ? targetwidth : targetheight * info.video.displayratio)
+  let finalheight = nearest16(wide ? targetwidth / info.video.displayratio : targetheight)
   if (finalheight === 1088 && finalwidth <= 1920) finalheight = 1080
   if (finalheight === 368 && finalwidth === 640) finalheight = 360
 
