@@ -35,7 +35,7 @@ module.exports = async (job) => {
   let finalwidth = nearest16(wide ? targetwidth : targetheight * info.video.displayratio)
   let finalheight = nearest16(wide ? targetwidth / info.video.displayratio : targetheight)
   if (finalheight === 1088 && finalwidth <= 1920) finalheight = 1080
-  if (finalheight === 368 && finalwidth === 640) finalheight = 360
+  if (finalheight === 368 && finalwidth <= 640) finalheight = 360
 
   const finalarea = finalwidth * finalheight
   const originalarea = info.video.display_width * info.video.display_height
