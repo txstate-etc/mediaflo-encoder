@@ -31,7 +31,7 @@ module.exports = async (job) => {
   const info = await mediainfo(inputpath)
   const targetheight = job.resolution
   const targetwidth = targetheight * 1.7778
-  const wide = 1.0 * info.displayratio > 1.7778
+  const wide = 1.0 * info.video.displayratio > 1.7778
   let finalwidth = nearest16(wide ? targetwidth : targetheight * 1.7778)
   let finalheight = nearest16(wide ? targetwidth / 1.7778 : targetheight)
   if (finalheight === 1088 && finalwidth <= 1920) finalheight = 1080
