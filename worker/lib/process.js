@@ -107,7 +107,7 @@ module.exports = async (job) => {
         const m = line.match(/(\d+\.\d+)\s?%/i)
         if (Array.isArray(m) && m[0]) {
           const progress = parseFloat(m[0])
-          db.update('UPDATE queue SET percent_complete=? WHERE id=?', progress, job.id).catch(err => console.log(err))
+          db.update('UPDATE queue SET percent_complete=?, encoding_completed=NOW() WHERE id=?', progress, job.id).catch(err => console.log(err))
         }
       })
       child.stderr.on('data', chunk => {
@@ -120,7 +120,7 @@ module.exports = async (job) => {
     })
   } else {
     return copy(inputpath, outputpath).on('progress', info => {
-      db.update('UPDATE queue SET percent_complete=? WHERE id=?', info.percent * 100.0, job.id)
+      db.update('UPDATE queue SET percent_complete=?, encoding_completed=NOW() WHERE id=?', info.percent * 100.0, job.id)
     })
   }
 }
