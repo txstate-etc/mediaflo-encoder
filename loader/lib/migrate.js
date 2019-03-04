@@ -34,7 +34,14 @@ module.exports = async function () {
   let version = await db.getrow('select id from version')
   version = version.id
 
-  // if (version === 1) {
+  if (version === 1) {
+    version++
+    console.log('updating database to version ' + version)
+    await db.execute(`ALTER TABLE queue CHANGE encoding_completed encoding_lastupdated DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP`)
+    await db.update('UPDATE version set id=?', version)
+  }
+
+  // if (version === 2) {
   //   version++
   //   console.log('updating database to version ' + version)
   //   await db.execute(`ALTER TABLE queue ...`)

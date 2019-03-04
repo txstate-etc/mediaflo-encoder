@@ -13,7 +13,7 @@ Loader and Worker must agree on a set of columns in MySQL:
 * final_width: unsigned smallint
 * final_height: unsigned smallint
 * encoding_started: datetime (UTC)
-* encoding_completed: datetime (UTC)
+* encoding_lastupdated: datetime (UTC)
 * percent_complete: decimal(5,2)
 
 # Notes
