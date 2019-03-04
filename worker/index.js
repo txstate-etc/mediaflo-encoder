@@ -16,11 +16,7 @@ async function getajob () {
         console.log('finished processing job', finaljob)
       } catch (error) {
         await db.update('UPDATE queue SET encoding_completed=NOW(), status="error", error=? WHERE id=?', error.toString(), job.id)
-        if (error instanceof UpscaleError && process.env.NODE_ENV !== 'development') {
-          // no need to log upscale errors in production, we expect them
-        } else {
-          throw error
-        }
+        throw error
       }
     }
   }
@@ -31,7 +27,11 @@ async function main () {
     try {
       await getajob()
     } catch (err) {
-      console.log(err)
+      if (err instanceof UpscaleError && process.env.NODE_ENV !== 'development') {
+        // no need to log upscale errors in production, we expect them
+      } else {
+        console.log(err)
+      }
     } finally {
       await _.sleep(1000)
     }
