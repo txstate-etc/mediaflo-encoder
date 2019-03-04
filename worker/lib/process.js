@@ -4,6 +4,7 @@ const exec = util.promisify(childprocess.exec)
 const fsp = require('fs').promises
 const db = require('txstate-node-utils/lib/mysql')
 const copy = require('cp-file')
+const { UpscaleError } = require('./errors')
 
 function nearest16 (num) {
   num = Math.round(num)
@@ -42,7 +43,7 @@ module.exports = async (job) => {
 
   // return error if an upscale was requested
   if (finalarea > originalarea * 1.3 && targetheight !== 360) {
-    throw new Error('Upscaling videos is not supported.')
+    throw new UpscaleError('Upscaling videos is not supported.')
   } else {
     await db.update('UPDATE queue SET final_width=?, final_height=? WHERE id=?', finalwidth, finalheight, job.id)
   }

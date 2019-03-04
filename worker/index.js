@@ -1,6 +1,7 @@
 const db = require('txstate-node-utils/lib/mysql')
 const _ = require('txstate-node-utils/lib/util')
 const processjob = require('./lib/process')
+const { UpscaleError } = require('./lib/errors')
 
 async function getajob () {
   const job = await db.getrow('SELECT * FROM queue WHERE status="waiting" ORDER BY id LIMIT 1')
@@ -15,7 +16,11 @@ async function getajob () {
         console.log('finished processing job', finaljob)
       } catch (error) {
         await db.update('UPDATE queue SET encoding_completed=NOW(), status="error", error=? WHERE id=?', error.toString(), job.id)
-        throw error
+        if (error instanceof UpscaleError && process.env.NODE_ENV !== 'development') {
+          // no need to log upscale errors in production, we expect them
+        } else {
+          throw error
+        }
       }
     }
   }
