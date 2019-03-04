@@ -16,6 +16,7 @@ async function getajob () {
         console.log('finished processing job', finaljob)
       } catch (error) {
         await db.update('UPDATE queue SET encoding_completed=NOW(), status="error", error=? WHERE id=?', error.toString(), job.id)
+        error.job = job
         throw error
       }
     }
@@ -27,8 +28,8 @@ async function main () {
     try {
       await getajob()
     } catch (err) {
-      if (err instanceof UpscaleError && process.env.NODE_ENV !== 'development') {
-        // no need to log upscale errors in production, we expect them
+      if (err instanceof UpscaleError) {
+        console.log('abandoned job due to upscale restriction', err.job)
       } else {
         console.log(err)
       }
