@@ -3,6 +3,7 @@ const app = service.app
 const migrate = require('./lib/migrate')
 const expressbasicauth = require('express-basic-auth')
 const ensembledb = require('./lib/ensembledb')
+require('./lib/resetjobs')
 
 // health check
 app.get('/api/?$', async (req, res) => {
