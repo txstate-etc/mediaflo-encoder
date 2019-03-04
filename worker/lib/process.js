@@ -45,7 +45,7 @@ module.exports = async (job) => {
   if (finalarea > originalarea * 1.3 && targetheight !== 360) {
     throw new UpscaleError('Upscaling videos is not supported.')
   } else {
-    await db.update('UPDATE queue SET final_width=?, final_height=? WHERE id=?', finalwidth, finalheight, job.id)
+    await db.update('UPDATE queue SET final_width=?, final_height=?, encoding_completed=NOW() WHERE id=?', finalwidth, finalheight, job.id)
   }
 
   // if video is interlaced, let's figure out whether it is a true interlace or actually a telecine
@@ -82,7 +82,7 @@ module.exports = async (job) => {
     }
   }
 
-  await db.update('UPDATE queue SET encoding_started=NOW() WHERE id=?', job.id)
+  await db.update('UPDATE queue SET encoding_started=NOW(), encoding_completed=NOW() WHERE id=?', job.id)
   // determine whether encoding is necessary
   if (detelecine || deinterlace || info.format !== 'mp4' ||
       finalarea * 1.3 < originalarea ||
