@@ -26,20 +26,48 @@ async function mediainfo (path) {
   return JSON.parse(output.stdout)
 }
 
+function detectcrop (output) {
+  const m = output.match(/autocrop\s*=\s*(\d+)\/(\d+)\/(\d+)\/(\d+)/i)
+  if (m) {
+    return { top: m[1], bottom: m[2], left: m[3], right: m[4] }
+  }
+  return null
+}
+
+async function cropinfo (path) {
+  try {
+    const output = await exec(`/HandBrakeCLI -i "${path}" --scan --previews 25`)
+    return detectcrop(output.stdout) || detectcrop(output.stderr) || { top: 0, bottom: 0, left: 0, right: 0 }
+  } catch (e) {
+    console.log(e)
+  }
+  return { top: 0, bottom: 0, left: 0, right: 0 }
+}
+
 module.exports = async (job) => {
   const inputpath = job.source_path
   const outputpath = job.dest_path
   const info = await mediainfo(inputpath)
   const targetheight = job.resolution
   const targetwidth = targetheight * 1.7778
-  const wide = 1.0 * info.video.displayratio > 1.7778
-  let finalwidth = nearest16(wide ? targetwidth : targetheight * info.video.displayratio)
-  let finalheight = nearest16(wide ? targetwidth / info.video.displayratio : targetheight)
+  const videowidth = info.video.display_width
+  const videoheight = info.video.display_height
+  const anamorphicscale = info.video.display_width / info.video.width
+
+  // gather crop information
+  const { top, bottom, left, right } = await cropinfo(inputpath)
+  const croppedwidth = videowidth - ((left + right) * anamorphicscale)
+  const croppedheight = videoheight - top - bottom
+  const displayratio = croppedwidth / croppedheight
+
+  const wide = displayratio > 1.7778
+  let finalwidth = nearest16(wide ? targetwidth : targetheight * displayratio)
+  let finalheight = nearest16(wide ? targetwidth / displayratio : targetheight)
   if (finalheight === 1088 && finalwidth <= 1920) finalheight = 1080
   if (finalheight === 368 && finalwidth <= 640) finalheight = 360
 
   const finalarea = finalwidth * finalheight
-  const originalarea = info.video.display_width * info.video.display_height
+  const originalarea = croppedwidth * croppedheight
 
   // return error if an upscale was requested
   if (finalarea > originalarea * 1.3 && targetheight !== 360) {
@@ -65,7 +93,7 @@ module.exports = async (job) => {
     try {
       await exec('/HandBrakeCLI -i "' + inputpath + '" -o "' + testpath + '" -f mp4 -m --optimize ' +
         '--custom-anamorphic --pixel-aspect 1:1 -w 200 -l 200 -e x264 -q 30 ' +
-        '--crop 0:0:0:0 ' +
+        `--crop ${top}:${bottom}:${left}:${right} ` +
         '-x "ref=3:weightp=0:b-pyramid=strict:b-adapt=2:me=umh:subme=6:rc-lookahead=40" ' +
         '-a none --no-markers --detelecine --vfr ' +
         '--start-at duration:' + startat + ' --stop-at duration:3')
@@ -93,7 +121,7 @@ module.exports = async (job) => {
     const child = childprocess.spawn('/HandBrakeCLI', [
       '-i', inputpath, '-o', outputpath,
       '-f', 'mp4', '-m', '--optimize',
-      '--custom-anamorphic', '--pixel-aspect', '1:1', '--crop', '0:0:0:0',
+      '--custom-anamorphic', '--pixel-aspect', '1:1', '--crop', `${top}:${bottom}:${left}:${right}`,
       '-w', finalwidth, '-l', finalheight, '--cfr', '--rate', finalfps,
       ...(detelecine ? ['--detelecine'] : []), ...(deinterlace ? ['--deinterlace=bob'] : []),
       '-e', 'x264', '-q', '20', '-x', 'ref=3:weightp=0:b-pyramid=strict:b-adapt=2:me=umh:subme=7:rc-lookahead=40',
