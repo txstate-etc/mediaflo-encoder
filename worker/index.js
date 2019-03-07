@@ -2,6 +2,7 @@ const db = require('txstate-node-utils/lib/mysql')
 const _ = require('txstate-node-utils/lib/util')
 const processjob = require('./lib/process')
 const { UpscaleError } = require('./lib/errors')
+const fsp = require('fs').promises
 
 async function getajob () {
   const job = await db.getrow('SELECT * FROM queue WHERE status="waiting" ORDER BY id LIMIT 1')
@@ -24,6 +25,21 @@ async function getajob () {
 }
 
 async function main () {
+  if (process.env.NODE_ENV === 'development') {
+    try {
+      const testfiles = await fsp.readdir('/video_src', { withFileTypes: true })
+      for (const file of testfiles) {
+        if (file.isFile()) {
+          const filedest = file.name.replace(/\.\w+$/, '.mp4')
+          await db.execute('DELETE FROM queue WHERE id=?', file.name)
+          await db.insert('INSERT INTO queue (id, name, source_path, dest_path, resolution) VALUES (?,?,?,?,?)',
+            file.name, file.name, `/video_src/${file.name}`, `/video_dest/${filedest}`, 480)
+        }
+      }
+    } catch (e) {
+      console.log(e)
+    }
+  }
   while (true) {
     try {
       await getajob()
