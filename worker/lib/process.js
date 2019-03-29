@@ -18,7 +18,7 @@ function normalizefps (fps) {
   if (fps < 26) return 23.976
   if (fps < 34) return 29.97
   if (fps < 55) return fps
-  return 59.97
+  return 59.94
 }
 
 async function mediainfo (path) {
