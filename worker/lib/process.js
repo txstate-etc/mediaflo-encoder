@@ -29,7 +29,7 @@ async function mediainfo (path) {
 function detectcrop (output) {
   const m = output.match(/autocrop\s*=\s*(\d+)\/(\d+)\/(\d+)\/(\d+)/i)
   if (m) {
-    return { top: m[1], bottom: m[2], left: m[3], right: m[4] }
+    return { top: parseInt(m[1]), bottom: parseInt(m[2]), left: parseInt(m[3]), right: parseInt(m[4]) }
   }
   return null
 }
