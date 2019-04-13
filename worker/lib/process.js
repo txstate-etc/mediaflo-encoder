@@ -110,6 +110,11 @@ module.exports = async (job) => {
     }
   }
 
+  // determine audio quality
+  let aq = 2
+  if (job.resolution > 800) aq = 3
+  else if (job.resolution < 400) aq = 1
+
   await db.update('UPDATE queue SET encoding_started=NOW(), encoding_lastupdated=NOW() WHERE id=?', job.id)
   // determine whether encoding is necessary
   if (detelecine || deinterlace || info.format !== 'mp4' ||
@@ -125,7 +130,7 @@ module.exports = async (job) => {
       '-w', finalwidth, '-l', finalheight, '--cfr', '--rate', finalfps,
       ...(detelecine ? ['--detelecine'] : []), ...(deinterlace ? ['--deinterlace=bob'] : []),
       '-e', 'x264', '-q', '20', '-x', 'ref=3:weightp=0:b-pyramid=strict:b-adapt=2:me=umh:subme=7:rc-lookahead=40',
-      '-a', '1', '-E', 'fdk_aac', '--aq', '2', '-6', 'dpl2',
+      '-a', '1', '-E', 'fdk_aac', '--aq', aq, '-6', 'dpl2',
       '--no-markers'
     ])
 
