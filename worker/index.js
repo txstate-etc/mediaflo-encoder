@@ -5,7 +5,7 @@ const { UpscaleError } = require('./lib/errors')
 const fsp = require('fs').promises
 
 async function getajob () {
-  const job = await db.getrow('SELECT * FROM queue WHERE status="waiting" ORDER BY id LIMIT 1')
+  const job = await db.getrow('SELECT * FROM queue WHERE status="waiting" ORDER BY job_created LIMIT 1')
   if (job) {
     const mine = await db.update('UPDATE queue SET status="working", encoding_lastupdated=NOW() WHERE status="waiting" AND id=?', job.id)
     if (mine) {
