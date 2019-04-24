@@ -38,24 +38,26 @@ if (scalar @$menus > 0) {
 
 my $v = {};
 my $video = $dom->find('track[type="Video"]')->first;
-$v->{format} = lc(shortest($video, 'Format'));
-$v->{format} = 'mpeg2' if shortest($video, 'CodecID') eq 'V_MPEG2';
-$v->{frames} = numeric($video, 'FrameCount');
-$v->{width} = numeric($video, 'Stored_Width') || numeric($video, 'Width');
-$v->{height} = numeric($video, 'Stored_Height') || numeric($video, 'Height');
-$v->{duration} = numeric($video, 'Duration') || timelength($video, 'FromStats_Duration');
-$v->{displayratio} = numeric($video, 'DisplayAspectRatio') || ($v->{height} ? $v->{width} / $v->{height} : 16.0/9.0);
-$v->{display_height} = $v->{height};
-$v->{display_width} = int(0.5 + $v->{displayratio} * $v->{display_height});
-$v->{mode} = lc(shortest($video, 'FrameRate_Mode'));
-$v->{bps} = numeric($video, 'BitRate') || numeric($video, 'FromStats_BitRate');
-$v->{fps} = numeric($video, 'FrameRate') || numeric($video, 'FrameRateOriginal');
-$v->{colordepth} = numeric($video, 'BitDepth');
-$v->{interlaced} = lc(longest($video, 'ScanType')) eq 'interlaced' ? JSON::true : JSON::false;
-$v->{language} = lc(target($video, 'Language', 2)) || $default_lang;
-$v->{default} = boolean($video, 'Default');
-$v->{forced} = boolean($video, 'Forced');
-$ret->{video} = $v;
+if ($video) {
+  $v->{format} = lc(shortest($video, 'Format'));
+  $v->{format} = 'mpeg2' if shortest($video, 'CodecID') eq 'V_MPEG2';
+  $v->{frames} = numeric($video, 'FrameCount');
+  $v->{width} = numeric($video, 'Stored_Width') || numeric($video, 'Width');
+  $v->{height} = numeric($video, 'Stored_Height') || numeric($video, 'Height');
+  $v->{duration} = numeric($video, 'Duration') || timelength($video, 'FromStats_Duration');
+  $v->{displayratio} = numeric($video, 'DisplayAspectRatio') || ($v->{height} ? $v->{width} / $v->{height} : 16.0/9.0);
+  $v->{display_height} = $v->{height};
+  $v->{display_width} = int(0.5 + $v->{displayratio} * $v->{display_height});
+  $v->{mode} = lc(shortest($video, 'FrameRate_Mode'));
+  $v->{bps} = numeric($video, 'BitRate') || numeric($video, 'FromStats_BitRate');
+  $v->{fps} = numeric($video, 'FrameRate') || numeric($video, 'FrameRateOriginal');
+  $v->{colordepth} = numeric($video, 'BitDepth');
+  $v->{interlaced} = lc(longest($video, 'ScanType')) eq 'interlaced' ? JSON::true : JSON::false;
+  $v->{language} = lc(target($video, 'Language', 2)) || $default_lang;
+  $v->{default} = boolean($video, 'Default');
+  $v->{forced} = boolean($video, 'Forced');
+  $ret->{video} = $v;
+}
 
 $ret->{audio} = [];
 foreach my $audio (@{$dom->find('track[type="Audio"]')}) {

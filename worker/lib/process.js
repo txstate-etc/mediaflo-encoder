@@ -5,6 +5,7 @@ const fsp = require('fs').promises
 const db = require('txstate-node-utils/lib/mysql')
 const copy = require('cp-file')
 const { UpscaleError } = require('./errors')
+const process_audio = require('./audio')
 
 function nearest16 (num) {
   num = Math.round(num)
@@ -48,6 +49,7 @@ module.exports = async (job) => {
   const inputpath = job.source_path
   const outputpath = job.dest_path
   const info = await mediainfo(inputpath)
+  if (!info.video) return process_audio(job, info)
   const targetheight = job.resolution
   const targetwidth = targetheight * 1.7778
   const videowidth = info.video.display_width

@@ -47,7 +47,7 @@ RUN \
 FROM node:10-alpine
 WORKDIR /usr/src/app
 RUN apk update && apk upgrade && \
-    apk add mediainfo perl perl-mojolicious perl-json \
+    apk add ffmpeg mediainfo perl perl-mojolicious perl-json \
     libass lame libsamplerate libtheora libvorbis x264-dev opus speex jansson \
     libxml2 xz
 COPY --from=handbrake /tmp/HandBrake/build/HandBrakeCLI /HandBrakeCLI
