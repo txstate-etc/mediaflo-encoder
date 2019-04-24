@@ -33,7 +33,7 @@ async function main () {
           const filedest = file.name.endsWith('.wav') ? file.name.replace(/\.\w+$/, '.mp3') : file.name.replace(/\.\w+$/, '.mp4')
           await db.execute('DELETE FROM queue WHERE id=?', file.name)
           await db.insert('INSERT INTO queue (id, name, source_path, dest_path, resolution) VALUES (?,?,?,?,?)',
-            file.name, file.name, `/video_src/${file.name}`, `/video_dest/${filedest}`, 480)
+            file.name, file.name, `/video_src/${file.name}`, `/video_dest/${filedest}`, 360)
         }
       }
     } catch (e) {

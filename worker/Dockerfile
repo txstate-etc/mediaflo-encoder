@@ -44,13 +44,76 @@ RUN \
                 --launch-jobs=$(nproc) \
                 --launch
 
+# Build FFmpeg
+FROM alpine:3.8 as ffmpeg
+
+ARG FFMPEG_VERSION=4.1.2
+
+ARG PREFIX=/opt/ffmpeg
+ARG LD_LIBRARY_PATH=/opt/ffmpeg/lib
+ARG MAKEFLAGS="-j4"
+
+# FFmpeg build dependencies.
+RUN apk add --update \
+  build-base \
+  freetype-dev \
+  gcc \
+  lame-dev \
+  libogg-dev \
+  libass \
+  libass-dev \
+  libvorbis-dev \
+  libwebp-dev \
+  libtheora-dev \
+  opus-dev \
+  pkgconf \
+  pkgconfig \
+  wget \
+  yasm
+
+# Get fdk-aac from testing.
+RUN echo http://dl-cdn.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories && \
+  apk add --update fdk-aac-dev
+
+# Get ffmpeg source.
+RUN cd /tmp/ && \
+  wget http://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.gz && \
+  tar zxf ffmpeg-${FFMPEG_VERSION}.tar.gz && rm ffmpeg-${FFMPEG_VERSION}.tar.gz
+
+# Compile ffmpeg.
+RUN cd /tmp/ffmpeg-${FFMPEG_VERSION} && \
+  ./configure \
+  --enable-version3 \
+  --enable-gpl \
+  --enable-nonfree \
+  --enable-small \
+  --enable-libmp3lame \
+  --enable-libtheora \
+  --enable-libvorbis \
+  --enable-libopus \
+  --enable-libfdk-aac \
+  --enable-libass \
+  --enable-postproc \
+  --enable-avresample \
+  --enable-libfreetype \
+  --disable-debug \
+  --disable-doc \
+  --disable-ffplay \
+  --extra-cflags="-I${PREFIX}/include" \
+  --extra-ldflags="-L${PREFIX}/lib" \
+  --extra-libs="-lpthread -lm" \
+  --prefix="${PREFIX}" && \
+  make && make install && make distclean
+
 FROM node:10-alpine
 WORKDIR /usr/src/app
 RUN apk update && apk upgrade && \
-    apk add ffmpeg mediainfo perl perl-mojolicious perl-json \
+    apk add mediainfo perl perl-mojolicious perl-json \
     libass lame libsamplerate libtheora libvorbis x264-dev opus speex jansson \
-    libxml2 xz
+    libxml2 xz libogg
 COPY --from=handbrake /tmp/HandBrake/build/HandBrakeCLI /HandBrakeCLI
+COPY --from=ffmpeg /opt/ffmpeg /opt/ffmpeg
+COPY --from=ffmpeg /usr/lib/libfdk-aac.so.2 /usr/lib/libfdk-aac.so.2
 
 COPY package.json ./
 RUN npm install --quiet --production
