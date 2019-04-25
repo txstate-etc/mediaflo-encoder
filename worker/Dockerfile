@@ -48,20 +48,13 @@ RUN \
 FROM alpine:3.8 as ffmpeg
 
 ARG FFMPEG_VERSION=4.1.2
-
 ARG PREFIX=/opt/ffmpeg
-ARG LD_LIBRARY_PATH=/opt/ffmpeg/lib
-ARG MAKEFLAGS="-j4"
 
 # FFmpeg build dependencies.
 RUN apk add --update \
   build-base \
-  freetype-dev \
   gcc \
   lame-dev \
-  libogg-dev \
-  libass \
-  libass-dev \
   libvorbis-dev \
   libwebp-dev \
   libtheora-dev \
@@ -92,10 +85,8 @@ RUN cd /tmp/ffmpeg-${FFMPEG_VERSION} && \
   --enable-libvorbis \
   --enable-libopus \
   --enable-libfdk-aac \
-  --enable-libass \
   --enable-postproc \
   --enable-avresample \
-  --enable-libfreetype \
   --disable-debug \
   --disable-doc \
   --disable-ffplay \
@@ -110,7 +101,7 @@ WORKDIR /usr/src/app
 RUN apk update && apk upgrade && \
     apk add mediainfo perl perl-mojolicious perl-json \
     libass lame libsamplerate libtheora libvorbis x264-dev opus speex jansson \
-    libxml2 xz libogg
+    libxml2 xz
 COPY --from=handbrake /tmp/HandBrake/build/HandBrakeCLI /HandBrakeCLI
 COPY --from=ffmpeg /opt/ffmpeg /opt/ffmpeg
 COPY --from=ffmpeg /usr/lib/libfdk-aac.so.2 /usr/lib/libfdk-aac.so.2
