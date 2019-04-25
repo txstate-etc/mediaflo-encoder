@@ -49,7 +49,7 @@ router.get('/status/:id/$', async (req, res) => {
     return
   }
 
-  if (job.status === 'error' && job.error.match(/Upscaling videos is not supported/)) {
+  if (job.status === 'error' && (job.error.match(/Upscaling videos is not supported/) || job.error.match(/Audio only/))) {
     await ensembledb.dropencodingforjob(req.params.id)
   }
 
