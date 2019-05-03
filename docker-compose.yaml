@@ -6,8 +6,6 @@ services:
     environment:
       NODE_ENV: development
       DB_HOST: mariadb
-    ports:
-      - 80:80
     links:
       - mariadb
     volumes:

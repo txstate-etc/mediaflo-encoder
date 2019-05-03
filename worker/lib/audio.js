@@ -17,13 +17,14 @@ module.exports = (job, info) => {
     job.dest_path
   ])
   return new Promise((resolve, reject) => {
+    let output = ''
     child.stdout.on('data', chunk => {
+      // progress is on stderr, just save stdout for debugging errors
       const line = chunk.toString('utf8')
-      // console.log('stdout', line)
+      output += line
     })
     child.stderr.on('data', chunk => {
       const line = chunk.toString('utf8')
-      // console.log('stderr', line)
       const m = line.match(/time=(\d+):(\d+):(\d+).(\d+)/i)
       if (Array.isArray(m) && m[0]) {
         const hours = parseInt(m[1])
@@ -31,13 +32,16 @@ module.exports = (job, info) => {
         const seconds = parseInt(m[3]) + parseFloat('0.'+m[4])
         const total = hours * 3600 + minutes * 60 + seconds
         const progress = Math.round(10000.0 * total / duration) / 100
-        db.update('UPDATE queue SET percent_complete=?, encoding_lastupdated=NOW() WHERE id=?', progress, job.id).catch(err => console.log(err))
+        db.update('UPDATE queue SET percent_complete=?, encoding_lastupdated=NOW() WHERE id=?', progress, job.id).catch(err => console.warn(err))
+      } else {
+        output += line
       }
-      // debug info, unnecessary for now
     })
     child.on('close', (code) => {
-      if (code) reject(new Error('HandBrake returned failure code.'))
-      else resolve()
+      if (code) {
+        console.error(output)
+        reject(new Error('ffmpeg returned failure code. see log for details'))
+      } else resolve()
     })
   })
 }

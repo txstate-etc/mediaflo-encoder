@@ -3,7 +3,7 @@ const db = require('txstate-node-utils/lib/mysql')
 module.exports = async function () {
   const tables = await db.getall('show tables')
   if (tables.length === 0) {
-    console.log('initializing database')
+    console.info('initializing database')
     await db.execute(`
       CREATE TABLE IF NOT EXISTS queue (
         id VARCHAR(40) NOT NULL,
@@ -36,24 +36,24 @@ module.exports = async function () {
 
   if (version === 1) {
     version++
-    console.log('updating database to version ' + version)
+    console.info('updating database to version ' + version)
     await db.execute(`ALTER TABLE queue CHANGE encoding_completed encoding_lastupdated DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP`)
     await db.update('UPDATE version set id=?', version)
   }
 
   if (version === 2) {
     version++
-    console.log('updating database to version ' + version)
+    console.info('updating database to version ' + version)
     await db.execute(`ALTER TABLE queue ADD reset_count int not null default 0`)
     await db.update('UPDATE version set id=?', version)
   }
 
   // if (version === 3) {
   //   version++
-  //   console.log('updating database to version ' + version)
+  //   console.info('updating database to version ' + version)
   //   await db.execute(`ALTER TABLE queue ...`)
   //   await db.update('UPDATE version set id=?', version)
   // }
 
-  console.log('database version is ' + version)
+  console.debug('database version is ' + version)
 }

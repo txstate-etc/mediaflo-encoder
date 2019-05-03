@@ -9,12 +9,12 @@ async function getajob () {
   if (job) {
     const mine = await db.update('UPDATE queue SET status="working", encoding_lastupdated=NOW() WHERE status="waiting" AND id=?', job.id)
     if (mine) {
-      console.log('I got a job!', job.id)
+      console.debug('I got a job!', job.id)
       try {
         await processjob(job)
         await db.update('UPDATE queue SET encoding_lastupdated=NOW(), status="success" WHERE id=?', job.id)
         const finaljob = await db.getrow('SELECT * FROM queue WHERE id=?', job.id)
-        console.log('finished processing job', finaljob)
+        console.debug('finished processing job', finaljob)
       } catch (error) {
         await db.update('UPDATE queue SET encoding_lastupdated=NOW(), status="error", error=? WHERE id=?', error.toString(), job.id)
         error.job = job
@@ -30,14 +30,14 @@ async function main () {
       const testfiles = await fsp.readdir('/video_src', { withFileTypes: true })
       for (const file of testfiles) {
         if (file.isFile()) {
-          const filedest = file.name.endsWith('.wav') ? file.name.replace(/\.\w+$/, '.mp3') : file.name.replace(/\.\w+$/, '.mp4')
+          const filedest = file.name.replace(/\.\w+$/, '.mp4')
           await db.execute('DELETE FROM queue WHERE id=?', file.name)
           await db.insert('INSERT INTO queue (id, name, source_path, dest_path, resolution) VALUES (?,?,?,?,?)',
             file.name, file.name, `/video_src/${file.name}`, `/video_dest/${filedest}`, 360)
         }
       }
     } catch (e) {
-      console.log(e)
+      console.warn(e)
     }
   }
   while (true) {
@@ -45,9 +45,9 @@ async function main () {
       await getajob()
     } catch (err) {
       if (err instanceof UpscaleError) {
-        console.log('abandoned job due to upscale restriction', err.job)
+        console.info('abandoned job due to upscale restriction', err.job)
       } else {
-        console.log(err)
+        console.error(err)
       }
     } finally {
       await _.sleep(1000)

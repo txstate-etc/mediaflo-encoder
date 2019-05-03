@@ -22,8 +22,8 @@ Promise.all([
   ensembledb.wait()
 ]).then(async () => {
   await service.start()
-  console.log('Loader started!')
+  console.info('Loader started!')
 }).catch((err) => {
-  console.log('Migration failed', err)
+  console.error('Migration failed', err)
   process.exit()
 })

@@ -19,7 +19,7 @@ class Db {
         return
       } catch (error) {
         // sleep and try again
-        console.log('Unable to connect to Ensemble Database, trying again in 2 seconds.')
+        console.warn('Unable to connect to Ensemble Database, trying again in 2 seconds.')
         await _.sleep(2000)
       }
     }

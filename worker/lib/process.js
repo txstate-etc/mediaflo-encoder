@@ -40,7 +40,7 @@ async function cropinfo (path) {
     const output = await exec(`/HandBrakeCLI -i "${path}" --scan --previews 25`)
     return detectcrop(output.stdout) || detectcrop(output.stderr) || { top: 0, bottom: 0, left: 0, right: 0 }
   } catch (e) {
-    console.log(e)
+    console.error(e)
   }
   return { top: 0, bottom: 0, left: 0, right: 0 }
 }
@@ -142,7 +142,7 @@ module.exports = async (job) => {
         const m = line.match(/(\d+\.\d+)\s?%/i)
         if (Array.isArray(m) && m[0]) {
           const progress = parseFloat(m[0])
-          db.update('UPDATE queue SET percent_complete=?, encoding_lastupdated=NOW() WHERE id=?', progress, job.id).catch(err => console.log(err))
+          db.update('UPDATE queue SET percent_complete=?, encoding_lastupdated=NOW() WHERE id=?', progress, job.id).catch(err => console.warn(err))
         }
       })
       child.stderr.on('data', chunk => {
