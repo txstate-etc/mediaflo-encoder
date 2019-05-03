@@ -27,12 +27,13 @@ router.post('/?$', async (req, res) => {
   data.source = data.source.replace(/^file:\/\//, '/media/')
   data.destination = data.destination.replace(/^file:\/\//, '/media/')
 
-  await db.insert('INSERT INTO queue(id, name, source_path, dest_path, resolution) values (?,?,?,?,?)',
+  await db.insert('INSERT INTO queue(id, name, source_path, dest_path, resolution, always_encode) values (?,?,?,?,?,?)',
     data.jobid,
     data.name,
     data.source,
     data.destination,
-    data.preset.height
+    data.preset.height,
+    data.preset.always_encode ? 1 : 0
   )
 
   var root = xmlbuilder.create('JobIdInfo')

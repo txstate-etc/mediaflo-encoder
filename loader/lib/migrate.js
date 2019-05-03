@@ -48,7 +48,14 @@ module.exports = async function () {
     await db.update('UPDATE version set id=?', version)
   }
 
-  // if (version === 3) {
+  if (version === 3) {
+    version++
+    console.info('updating database to version ' + version)
+    await db.execute(`ALTER TABLE queue ADD always_encode boolean not null default false`)
+    await db.update('UPDATE version set id=?', version)
+  }
+
+  // if (version === 4) {
   //   version++
   //   console.info('updating database to version ' + version)
   //   await db.execute(`ALTER TABLE queue ...`)

@@ -1,11 +1,5 @@
 [
   {
-    "id": "31390ea3-b366-42d6-aa13-035df75c74cd",
-    "created": "2019-04-22T00:00:00",
-    "name": "Compress and Stream 360px",
-    "height": 360
-  },
-  {
     "id": "4f5bcb0e-32a9-41e9-b918-03d54a7c4be4",
     "created": "2019-02-18T00:00:00",
     "name": "Handbrake 360px",
@@ -28,5 +22,40 @@
     "created": "2019-02-18T00:00:00",
     "name": "Handbrake 1080px",
     "height": 1080
+  },
+  {
+    "id": "31390ea3-b366-42d6-aa13-035df75c74cd",
+    "created": "2019-04-22T00:00:00",
+    "name": "Single encode up to 360px",
+    "height": 360,
+    "always_encode": true
+  },
+  {
+    "id": "524ef0dd-45f0-42a8-9535-1c9e787940bd",
+    "created": "2019-05-03T00:00:00",
+    "name": "Single encode up to 480px",
+    "height": 480,
+    "always_encode": true
+  },
+  {
+    "id": "7c196ccd-78f6-497d-8949-803163ae6384",
+    "created": "2019-05-03T00:00:00",
+    "name": "Single encode up to 720px",
+    "height": 720,
+    "always_encode": true
+  },
+  {
+    "id": "89403034-9d87-4b00-8344-9e2ac6efd2c5",
+    "created": "2019-05-03T00:00:00",
+    "name": "Single encode up to 1080px",
+    "height": 1080,
+    "always_encode": true
+  },
+  {
+    "id": "d6f9f173-43ae-49d2-b3a3-a8612e3098e1",
+    "created": "2019-05-03T00:00:00",
+    "name": "Single encode up to 1440px",
+    "height": 1440,
+    "always_encode": true
   }
 ]

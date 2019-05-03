@@ -37,12 +37,20 @@ function detectcrop (output) {
 
 async function cropinfo (path) {
   try {
-    const output = await exec(`/HandBrakeCLI -i "${path}" --scan --previews 25`)
+    const output = await exec(`/HandBrakeCLI -i "${path}" --scan --previews 50`)
     return detectcrop(output.stdout) || detectcrop(output.stderr) || { top: 0, bottom: 0, left: 0, right: 0 }
   } catch (e) {
     console.error(e)
   }
   return { top: 0, bottom: 0, left: 0, right: 0 }
+}
+
+function finaldimensions (width, height) {
+  let finalwidth = nearest16(width)
+  let finalheight = nearest16(height)
+  if (finalheight === 1088 && finalwidth <= 1920) finalheight = 1080
+  if (finalheight === 368 && finalwidth <= 640) finalheight = 360
+  return { finalwidth, finalheight, finalarea: finalwidth * finalheight }
 }
 
 module.exports = async (job) => {
@@ -60,29 +68,34 @@ module.exports = async (job) => {
   const { top, bottom, left, right } = await cropinfo(inputpath)
   const croppedwidth = videowidth - ((left + right) * anamorphicscale)
   const croppedheight = videoheight - top - bottom
+  const originalarea = croppedwidth * croppedheight
   const displayratio = croppedwidth / croppedheight
 
   const wide = displayratio > 1.7778
-  let finalwidth = nearest16(wide ? targetwidth : targetheight * displayratio)
-  let finalheight = nearest16(wide ? targetwidth / displayratio : targetheight)
-  if (finalheight === 1088 && finalwidth <= 1920) finalheight = 1080
-  if (finalheight === 368 && finalwidth <= 640) finalheight = 360
+  const scaledwidth = wide ? targetwidth : targetheight * displayratio
+  const scaledheight = wide ? targetwidth / displayratio : targetheight
+  let { finalwidth, finalheight, finalarea } = finaldimensions(scaledwidth, scaledheight)
 
-  const finalarea = finalwidth * finalheight
-  const originalarea = croppedwidth * croppedheight
-
-  // return error if an upscale was requested
-  if (finalarea > originalarea * 1.3 && targetheight !== 360) {
-    throw new UpscaleError('Upscaling videos is not supported.')
-  } else {
-    await db.update('UPDATE queue SET final_width=?, final_height=?, encoding_lastupdated=NOW() WHERE id=?', finalwidth, finalheight, job.id)
+  // if this turns out to be an upscale, handle it differently
+  if (finalarea > originalarea) {
+    if (job.always_encode || finalarea < originalarea * 1.3) {
+      // we were instructed to create an encode no matter what, or
+      // the upscale is minimal (skipping it would be a significant loss of
+      // quality compared to the next step down in resolution), so we will use
+      // the original size
+      ({ finalwidth, finalheight, finalarea } = finaldimensions(croppedwidth, croppedheight))
+    } else {
+      // skip the encode entirely
+      throw new UpscaleError('Upscaling videos is not supported.')
+    }
   }
+  await db.update('UPDATE queue SET final_width=?, final_height=?, encoding_lastupdated=NOW() WHERE id=?', finalwidth, finalheight, job.id)
 
   // if video is interlaced, let's figure out whether it is a true interlace or actually a telecine
   // telecine means we should --detelecine and set framerate to 23.976
   // true interlace was recorded at 60i; we'll get best quality if we convert to 60p
   //
-  // HandBrake can help us tell the difference if we set it to detelecine with variable frame rate
+  // HandBrake can help us tell the difference if we set it to detelecine with variable frame rate:
   // on a telecine video, it will discard every 5th frame and the output video will be near 24fps
   // on a true interlaced video, it will not discard frames and will be near 30fps
   let finalfps = normalizefps(info.video.fps)
