@@ -2,6 +2,8 @@ const childprocess = require('child_process')
 const util = require('util')
 const exec = util.promisify(childprocess.exec)
 const fsp = require('fs').promises
+const path = require('path')
+const crypto = require('crypto')
 const db = require('txstate-node-utils/lib/mysql')
 const copy = require('cp-file')
 const { UpscaleError } = require('./errors')
@@ -22,8 +24,8 @@ function normalizefps (fps) {
   return 59.94
 }
 
-async function mediainfo (path) {
-  const output = await exec(`perl /usr/src/app/lib/mediainfo.pl "${path}"`)
+async function mediainfo (filepath) {
+  const output = await exec(`perl /usr/src/app/lib/mediainfo.pl "${filepath}"`)
   return JSON.parse(output.stdout)
 }
 
@@ -35,9 +37,9 @@ function detectcrop (output) {
   return null
 }
 
-async function cropinfo (path) {
+async function cropinfo (filepath) {
   try {
-    const output = await exec(`/HandBrakeCLI -i "${path}" --scan --previews 50`)
+    const output = await exec(`/HandBrakeCLI -i "${filepath}" --scan --previews 50`)
     return detectcrop(output.stdout) || detectcrop(output.stderr) || { top: 0, bottom: 0, left: 0, right: 0 }
   } catch (e) {
     console.error(e)
@@ -102,7 +104,7 @@ module.exports = async (job) => {
   let detelecine = false
   let deinterlace = false
   if (info.video.interlaced && Math.round(info.video.fps) === 30) {
-    const testpath = '/tmp/' + job.source_path
+    const testpath = path.resolve('/tmp', crypto.randomBytes(20).toString('hex') + '.mp4')
     const startat = Math.min(Math.floor(info.duration / 2.0), 60)
     let testinfo
     try {
