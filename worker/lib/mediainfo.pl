@@ -41,6 +41,8 @@ my $video = $dom->find('track[type="Video"]')->first;
 if ($video) {
   $v->{format} = lc(shortest($video, 'Format'));
   $v->{format} = 'mpeg2' if shortest($video, 'CodecID') eq 'V_MPEG2';
+  $v->{format} = 'avc' if $v->{format} eq 'h264';
+  $v->{level} = numeric($video, 'Format_Level');
   $v->{frames} = numeric($video, 'FrameCount');
   $v->{width} = numeric($video, 'Stored_Width') || numeric($video, 'Width');
   $v->{height} = numeric($video, 'Stored_Height') || numeric($video, 'Height');
@@ -48,9 +50,13 @@ if ($video) {
   $v->{displayratio} = numeric($video, 'DisplayAspectRatio') || ($v->{height} ? $v->{width} / $v->{height} : 16.0/9.0);
   $v->{display_height} = $v->{height};
   $v->{display_width} = int(0.5 + $v->{displayratio} * $v->{display_height});
-  $v->{mode} = lc(shortest($video, 'FrameRate_Mode'));
   $v->{bps} = numeric($video, 'BitRate') || numeric($video, 'FromStats_BitRate');
   $v->{fps} = numeric($video, 'FrameRate') || numeric($video, 'FrameRateOriginal');
+  $v->{fps_min} = numeric($video, 'FrameRate_Minimum');
+  $v->{fps_max} = numeric($video, 'FrameRate_Maximum');
+  $v->{mode} = lc(shortest($video, 'FrameRate_Mode'));
+  $v->{mode} = 'cfr' if $v->{mode} eq 'vfr' && $v->{fps} && $v->{fps_min} && $v->{fps_max} && ($v->{fps_max} - $v->{fps_min}) / $v->{fps} < 0.01;
+  $v->{vfr} = $v->{mode} eq 'vfr' ? JSON::true : JSON::false;
   $v->{colordepth} = numeric($video, 'BitDepth');
   $v->{interlaced} = lc(longest($video, 'ScanType')) eq 'interlaced' ? JSON::true : JSON::false;
   $v->{language} = lc(target($video, 'Language', 2)) || $default_lang;

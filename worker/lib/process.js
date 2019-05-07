@@ -103,29 +103,34 @@ module.exports = async (job) => {
   let finalfps = normalizefps(info.video.fps)
   let detelecine = false
   let deinterlace = false
-  if (info.video.interlaced && Math.round(info.video.fps) === 30) {
-    const testpath = path.resolve('/tmp', crypto.randomBytes(20).toString('hex') + '.mp4')
-    const startat = Math.min(Math.floor(info.duration / 2.0), 60)
-    let testinfo
-    try {
-      await exec('/HandBrakeCLI -i "' + inputpath + '" -o "' + testpath + '" -f mp4 -m --optimize ' +
-        '--custom-anamorphic --pixel-aspect 1:1 -w 200 -l 200 -e x264 -q 30 ' +
-        `--crop ${top}:${bottom}:${left}:${right} ` +
-        '-x "ref=3:weightp=0:b-pyramid=strict:b-adapt=2:me=umh:subme=6:rc-lookahead=40" ' +
-        '-a none --no-markers --detelecine --vfr ' +
-        '--start-at duration:' + startat + ' --stop-at duration:3')
-      testinfo = await mediainfo(testpath)
-    } finally {
-      await fsp.unlink(testpath)
-    }
-    if (testinfo.video.fps < 26.0) {
-      finalfps = 23.976
-      detelecine = true
-    } else {
-      finalfps = normalizefps(info.video.fps * 2.0)
-      deinterlace = true
+  if (info.video.interlaced) {
+    finalfps = normalizefps(info.video.fps * 2.0)
+    deinterlace = true
+    if (!info.video.vfr && Math.round(info.video.fps) === 30) {
+      const testpath = path.resolve('/tmp', crypto.randomBytes(20).toString('hex') + '.mp4')
+      const startat = Math.min(Math.floor(info.duration / 2.0), 60)
+      let testinfo
+      try {
+        await exec('/HandBrakeCLI -i "' + inputpath + '" -o "' + testpath + '" -f mp4 -m --optimize ' +
+          '--custom-anamorphic --pixel-aspect 1:1 -w 200 -l 200 -e x264 -q 30 ' +
+          `--crop ${top}:${bottom}:${left}:${right} ` +
+          '-x "ref=3:weightp=0:b-pyramid=strict:b-adapt=2:me=umh:subme=6:rc-lookahead=40" ' +
+          '-a none --no-markers --detelecine --vfr ' +
+          '--start-at duration:' + startat + ' --stop-at duration:3')
+        testinfo = await mediainfo(testpath)
+      } finally {
+        await fsp.unlink(testpath)
+      }
+      if (testinfo.video.fps < 26.0) {
+        finalfps = 23.976
+        deinterlace = false
+        detelecine = true
+      }
     }
   }
+
+  // special treatment for screen captures
+  if (info.video.vfr && finalfps <= 15) finalfps = 15
 
   // determine audio quality
   let aq = 2
@@ -137,7 +142,7 @@ module.exports = async (job) => {
   if (detelecine || deinterlace || info.format !== 'mp4' ||
       finalarea * 1.3 < originalarea ||
       info.audio.length > 1 || info.audio[0].format !== 'aac' ||
-      !info.streamable || info.video.format !== 'h264' ||
+      !info.streamable || info.video.format !== 'avc' || info.video.vfr ||
       info.video.bps > 10000000 * (finalarea / (1280 * 720.0))) {
     // encoding is necessary
     const child = childprocess.spawn('/HandBrakeCLI', [
