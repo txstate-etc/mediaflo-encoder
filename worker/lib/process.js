@@ -114,9 +114,9 @@ module.exports = async (job) => {
         await exec('/HandBrakeCLI -i "' + inputpath + '" -o "' + testpath + '" -f mp4 -m --optimize ' +
           '--custom-anamorphic --pixel-aspect 1:1 -w 200 -l 200 -e x264 -q 30 ' +
           `--crop ${top}:${bottom}:${left}:${right} ` +
-          '-x "ref=3:weightp=0:b-pyramid=strict:b-adapt=2:me=umh:subme=6:rc-lookahead=40" ' +
+          '-x "ref=3:weightp=0:b-pyramid=strict:b-adapt=2:me=hex:subme=6:rc-lookahead=40" ' +
           '-a none --no-markers --detelecine --vfr ' +
-          '--start-at duration:' + startat + ' --stop-at duration:3')
+          '--start-at duration:' + startat + ' --stop-at duration:6')
         testinfo = await mediainfo(testpath)
       } finally {
         await fsp.unlink(testpath)
