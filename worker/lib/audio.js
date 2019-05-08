@@ -39,7 +39,7 @@ module.exports = (job, info) => {
     })
     child.on('close', (code) => {
       if (code) {
-        console.error(output)
+        console.error('ffmpeg error', output, info)
         reject(new Error('ffmpeg returned failure code. see log for details'))
       } else resolve()
     })

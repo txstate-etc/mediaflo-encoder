@@ -157,19 +157,25 @@ module.exports = async (job) => {
     ])
 
     return new Promise((resolve, reject) => {
+      let output = ''
       child.stdout.on('data', chunk => {
         const line = chunk.toString('utf8')
         const m = line.match(/(\d+\.\d+)\s?%/i)
         if (Array.isArray(m) && m[0]) {
           const progress = parseFloat(m[0])
           db.update('UPDATE queue SET percent_complete=?, encoding_lastupdated=NOW() WHERE id=?', progress, job.id).catch(err => console.warn(err))
+        } else {
+          output += line
         }
       })
       child.stderr.on('data', chunk => {
-        // debug info, unnecessary for now
+        output += chunk.toString('utf8')
       })
       child.on('close', (code) => {
-        if (code) reject(new Error('HandBrake returned failure code.'))
+        if (code) {
+          console.error('Handbrake failure.', output, info)
+          reject(new Error('HandBrake returned failure code.'))
+        }
         else resolve()
       })
     })
