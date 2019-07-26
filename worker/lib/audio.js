@@ -29,7 +29,7 @@ module.exports = (job, info) => {
       if (Array.isArray(m) && m[0]) {
         const hours = parseInt(m[1])
         const minutes = parseInt(m[2])
-        const seconds = parseInt(m[3]) + parseFloat('0.'+m[4])
+        const seconds = parseInt(m[3]) + parseFloat('0.' + m[4])
         const total = hours * 3600 + minutes * 60 + seconds
         const progress = Math.round(10000.0 * total / duration) / 100
         db.update('UPDATE queue SET percent_complete=?, encoding_lastupdated=NOW() WHERE id=?', progress, job.id).catch(err => console.warn(err))

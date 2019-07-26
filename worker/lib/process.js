@@ -7,7 +7,7 @@ const crypto = require('crypto')
 const db = require('txstate-node-utils/lib/mysql')
 const copy = require('cp-file')
 const { UpscaleError } = require('./errors')
-const process_audio = require('./audio')
+const processAudio = require('./audio')
 
 function nearest16 (num) {
   num = Math.round(num)
@@ -48,7 +48,7 @@ async function cropinfo (filepath) {
 }
 
 function finaldimensions (width, height) {
-  let finalwidth = nearest16(width)
+  const finalwidth = nearest16(width)
   let finalheight = nearest16(height)
   if (finalheight === 1088 && finalwidth <= 1920) finalheight = 1080
   if (finalheight === 368 && finalwidth <= 640) finalheight = 360
@@ -59,7 +59,7 @@ module.exports = async (job) => {
   const inputpath = job.source_path
   const outputpath = job.dest_path
   const info = await mediainfo(inputpath)
-  if (!info.video) return process_audio(job, info)
+  if (!info.video) return processAudio(job, info)
   const targetheight = job.resolution
   const targetwidth = targetheight * 1.7778
   const videowidth = info.video.display_width
@@ -175,8 +175,7 @@ module.exports = async (job) => {
         if (code) {
           console.error('Handbrake failure.', output, info)
           reject(new Error('HandBrake returned failure code.'))
-        }
-        else resolve()
+        } else resolve()
       })
     })
   } else {
