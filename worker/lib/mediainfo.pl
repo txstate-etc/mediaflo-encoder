@@ -44,9 +44,8 @@ if ($video) {
   $v->{format} = 'avc' if $v->{format} eq 'h264';
   $v->{level} = numeric($video, 'Format_Level');
   $v->{frames} = numeric($video, 'FrameCount');
-  $v->{width} = numeric($video, 'Stored_Width') || numeric($video, 'Width');
-  $v->{height} = numeric($video, 'Stored_Height') || numeric($video, 'Height');
-  $v->{duration} = numeric($video, 'Duration') || timelength($video, 'FromStats_Duration');
+  $v->{width} = numeric($video, 'Sampled_Width') || numeric($video, 'Width_Original') || numeric($video, 'Stored_Width') || numeric($video, 'Width');
+  $v->{height} = numeric($video, 'Sampled_Height') || numeric($video, 'Height_Original') || numeric($video, 'Stored_Height') || numeric($video, 'Height');  $v->{duration} = numeric($video, 'Duration') || timelength($video, 'FromStats_Duration');
   $v->{displayratio} = numeric($video, 'DisplayAspectRatio') || ($v->{height} ? $v->{width} / $v->{height} : 16.0/9.0);
   $v->{display_height} = $v->{height};
   $v->{display_width} = int(0.5 + $v->{displayratio} * $v->{display_height});
