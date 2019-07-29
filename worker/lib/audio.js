@@ -3,7 +3,7 @@ const db = require('txstate-node-utils/lib/mysql')
 const { UpscaleError } = require('./errors')
 
 module.exports = (job, info) => {
-  if (job.resolution > 360) throw new UpscaleError('Audio only, skipping higher quality encode.')
+  if (!job.always_encode) throw new UpscaleError('Audio only, skipping higher quality encode.')
   const duration = Math.round(info.duration * 100) / 100
   const audiosettings = []
   if (job.dest_path.endsWith('.mp3')) audiosettings.push('-c:a', 'libmp3lame', '-q:a', 5)
