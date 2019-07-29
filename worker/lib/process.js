@@ -37,10 +37,27 @@ function detectcrop (output) {
   return null
 }
 
-async function cropinfo (filepath) {
+async function runcrop (cmd) {
+  const output = await exec(cmd)
+  return detectcrop(output.stdout) || detectcrop(output.stderr) || { top: 0, bottom: 0, left: 0, right: 0 }
+}
+
+async function cropinfo (filepath, duration) {
   try {
-    const output = await exec(`/HandBrakeCLI -i "${filepath}" --scan --previews 50`)
-    return detectcrop(output.stdout) || detectcrop(output.stderr) || { top: 0, bottom: 0, left: 0, right: 0 }
+    // scan the first 10 seconds of the video to make sure title screens that don't match the same
+    // aspect ratio as the rest of the content do not get cropped
+    const stopat = Math.min(Math.floor(duration), 10)
+    const testpath = path.resolve('/tmp', crypto.randomBytes(20).toString('hex')) + path.extname(filepath)
+    await exec(`/opt/ffmpeg/bin/ffmpeg -i "${filepath}" -ss 0 -t ${stopat} -c copy "${testpath}"`)
+    const introcrop = await runcrop(`/HandBrakeCLI -i "${testpath}" --scan --previews 10`)
+    await fsp.unlink(testpath)
+
+    const fullcrop = await runcrop(`/HandBrakeCLI -i "${filepath}" --scan --previews 50`)
+    if (introcrop.top + introcrop.bottom + introcrop.left + introcrop.right > fullcrop.top + fullcrop.bottom + fullcrop.left + fullcrop.right) {
+      return fullcrop
+    } else {
+      return introcrop
+    }
   } catch (e) {
     console.error(e)
   }
@@ -67,7 +84,7 @@ module.exports = async (job) => {
   const anamorphicscale = info.video.display_width / info.video.width
 
   // gather crop information
-  const { top, bottom, left, right } = await cropinfo(inputpath)
+  const { top, bottom, left, right } = await cropinfo(inputpath, info.duration)
   const croppedwidth = videowidth - ((left + right) * anamorphicscale)
   const croppedheight = videoheight - top - bottom
   const originalarea = croppedwidth * croppedheight
