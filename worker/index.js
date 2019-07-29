@@ -24,16 +24,31 @@ async function getajob () {
   }
 }
 
+async function dbready () {
+  let lasterror
+  for (let i = 0; i < 5; i++) {
+    try {
+      await db.getall('SHOW COLUMNS FROM queue')
+      return
+    } catch (e) {
+      lasterror = e
+    }
+    await _.sleep(2000)
+  }
+  throw lasterror
+}
+
 async function main () {
   if (process.env.NODE_ENV === 'development') {
     try {
+      await dbready()
       const testfiles = await fsp.readdir('/video_src', { withFileTypes: true })
       for (const file of testfiles) {
         if (file.isFile()) {
           const filedest = file.name.replace(/\.\w+$/, '.mp4')
           await db.execute('DELETE FROM queue WHERE id=?', file.name)
           await db.insert('INSERT INTO queue (id, name, source_path, dest_path, resolution, always_encode) VALUES (?,?,?,?,?,1)',
-            file.name, file.name, `/video_src/${file.name}`, `/video_dest/${filedest}`, 1080)
+            file.name, file.name, `/video_src/${file.name}`, `/video_dest/${filedest}`, 480)
         }
       }
     } catch (e) {
