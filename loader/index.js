@@ -2,7 +2,6 @@ const service = require('txstate-node-utils/lib/service')
 const app = service.app
 const migrate = require('./lib/migrate')
 const expressbasicauth = require('express-basic-auth')
-const ensembledb = require('./lib/ensembledb')
 require('./lib/resetjobs')
 
 // health check
@@ -18,8 +17,7 @@ app.use('/api/presets', require('./routes/presets.js'))
 app.use('/api/jobs', require('./routes/jobs.js'))
 
 Promise.all([
-  migrate(),
-  ensembledb.wait()
+  migrate()
 ]).then(async () => {
   await service.start()
   console.info('Loader started!')
