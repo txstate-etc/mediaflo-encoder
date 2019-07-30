@@ -53,10 +53,11 @@ async function cropinfo (filepath, duration) {
     await fsp.unlink(testpath)
 
     const fullcrop = await runcrop(`/HandBrakeCLI -i "${filepath}" --scan --previews 50`)
-    if (introcrop.top + introcrop.bottom + introcrop.left + introcrop.right > fullcrop.top + fullcrop.bottom + fullcrop.left + fullcrop.right) {
-      return fullcrop
-    } else {
-      return introcrop
+    return {
+      top: Math.min(introcrop.top, fullcrop.top),
+      bottom: Math.min(introcrop.bottom, fullcrop.bottom),
+      left: Math.min(introcrop.left, fullcrop.left),
+      right: Math.min(introcrop.right, fullcrop.right)
     }
   } catch (e) {
     console.error(e)
