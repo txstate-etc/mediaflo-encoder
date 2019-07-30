@@ -17,7 +17,7 @@ function nearest16 (num) {
 
 function normalizefps (fps) {
   if (!fps) return 30
-  if (fps < 22 || fps > 64 || [23.976, 24, 29.97, 30, 59.94, 60].includes(fps)) return fps
+  if (fps < 22 || fps > 64 || [23.976, 24, 25, 29.97, 30, 59.94, 60].includes(fps)) return fps
   if (fps < 26) return 23.976
   if (fps < 34) return 29.97
   if (fps < 55) return fps
