@@ -44,11 +44,12 @@ async function main () {
       await dbready()
       const testfiles = await fsp.readdir('/video_src', { withFileTypes: true })
       for (const file of testfiles) {
-        if (file.isFile()) {
+        if (file.isFile() && file.name !== '.DS_Store') {
+          const id = file.name.substr(0, 20)
           const filedest = file.name.replace(/\.\w+$/, '.mp4')
-          await db.execute('DELETE FROM queue WHERE id=?', file.name)
+          await db.execute('DELETE FROM queue WHERE id=?', id)
           await db.insert('INSERT INTO queue (id, name, source_path, dest_path, resolution, always_encode) VALUES (?,?,?,?,?,1)',
-            file.name, file.name, `/video_src/${file.name}`, `/video_dest/${filedest}`, 480)
+            id, file.name, `/video_src/${file.name}`, `/video_dest/${filedest}`, 480)
         }
       }
     } catch (e) {
