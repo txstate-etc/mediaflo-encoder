@@ -1,4 +1,4 @@
-FROM alpine as handbrake
+FROM alpine:3.11 as handbrake
 WORKDIR /tmp
 # Compile HandBrake
 RUN \
@@ -23,9 +23,13 @@ RUN \
         libxml2-dev \
         libva-dev \
         libvorbis-dev \
+        libvpx-dev \
         linux-headers \
         m4 \
+        meson \
         nasm \
+        ninja \
+        numactl-dev \
         opus-dev \
         patch \
         python \
@@ -45,9 +49,9 @@ RUN \
                 --launch
 
 # Build FFmpeg
-FROM alpine:3.8 as ffmpeg
+FROM alpine:3.11 as ffmpeg
 
-ARG FFMPEG_VERSION=4.1.2
+ARG FFMPEG_VERSION=4.2.2
 ARG PREFIX=/opt/ffmpeg
 
 # FFmpeg build dependencies.
@@ -56,6 +60,7 @@ RUN apk add --update \
   gcc \
   lame-dev \
   libvorbis-dev \
+  libvpx-dev \
   libwebp-dev \
   libtheora-dev \
   opus-dev \
@@ -64,8 +69,8 @@ RUN apk add --update \
   wget \
   yasm
 
-# Get fdk-aac from testing.
-RUN echo http://dl-cdn.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories && \
+# Get fdk-aac from community.
+RUN echo http://dl-cdn.alpinelinux.org/alpine/edge/community >> /etc/apk/repositories && \
   apk add --update fdk-aac-dev
 
 # Get ffmpeg source.
@@ -83,6 +88,7 @@ RUN cd /tmp/ffmpeg-${FFMPEG_VERSION} && \
   --enable-libmp3lame \
   --enable-libtheora \
   --enable-libvorbis \
+  --enable-libvpx \
   --enable-libopus \
   --enable-libfdk-aac \
   --enable-postproc \
@@ -96,11 +102,11 @@ RUN cd /tmp/ffmpeg-${FFMPEG_VERSION} && \
   --prefix="${PREFIX}" && \
   make && make install && make distclean
 
-FROM node:10-alpine
+FROM node:12-alpine3.11
 WORKDIR /usr/src/app
 RUN apk update && apk upgrade && \
     apk add mediainfo perl perl-mojolicious perl-json \
-    libass lame libsamplerate libtheora libvorbis x264-dev opus speex jansson \
+    fribidi libass lame libsamplerate libtheora libvorbis libvpx x264-dev numactl opus speex jansson \
     libxml2 xz
 COPY --from=handbrake /tmp/HandBrake/build/HandBrakeCLI /HandBrakeCLI
 COPY --from=ffmpeg /opt/ffmpeg /opt/ffmpeg
