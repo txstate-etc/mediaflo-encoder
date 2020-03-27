@@ -159,7 +159,7 @@ module.exports = async (job) => {
   // determine whether encoding is necessary
   if (detelecine || deinterlace || info.format !== 'mp4' ||
       finalarea * 1.3 < originalarea ||
-      info.audio.length > 1 || info.audio[0].format !== 'aac' ||
+      info.audio.length > 1 || (info.audio[0] || {}).format !== 'aac' ||
       !info.streamable || info.video.format !== 'avc' || info.video.vfr ||
       info.video.bps > 10000000 * (finalarea / (1280 * 720.0))) {
     // encoding is necessary
