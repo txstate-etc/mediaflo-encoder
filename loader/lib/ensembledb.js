@@ -1,4 +1,4 @@
-const db = require('mssql-async/db')
+const db = require('mssql-async/db').default
 
 class Db {
   async dropencodingforjob (jobid) {
@@ -14,7 +14,7 @@ class Db {
       if (IsDefault) {
         await db.update(`
           WITH ENC AS (
-            SELECT TOP 1 * FROM Encodings WHERE VideoID=@VideoID AND NOT IsDeleted ORDER BY Width DESC
+            SELECT TOP 1 * FROM Encodings WHERE VideoID=@VideoID AND IsDeleted!=1 ORDER BY Width DESC
           ) UPDATE ENC SET IsDefault=1
         `, { VideoID })
       }
