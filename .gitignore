@@ -66,3 +66,4 @@ typings/
 !/sample_dest/.gitkeep
 /sample_src/*
 !/sample_src/testvideo.mp4
+package-lock.json

@@ -5,7 +5,7 @@ const bodyparser = require('body-parser')
 const xmlparsestring = require('../lib/xml-parsepromise.js')
 const db = require('txstate-node-utils/lib/mysql')
 const ensembledb = require('../lib/ensembledb.js')
-const uuidv4 = require('uuid/v4')
+const { v4: uuidv4 } = require('uuid')
 
 var router = express.Router()
 

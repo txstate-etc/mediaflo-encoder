@@ -102,7 +102,7 @@ RUN cd /tmp/ffmpeg-${FFMPEG_VERSION} && \
   --prefix="${PREFIX}" && \
   make && make install && make distclean
 
-FROM node:12-alpine3.11
+FROM node:14-alpine3.11
 WORKDIR /usr/src/app
 RUN apk update && apk upgrade && \
     apk add mediainfo perl perl-mojolicious perl-json \
