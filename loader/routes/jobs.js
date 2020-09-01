@@ -51,7 +51,11 @@ router.get('/status/:id/$', async (req, res) => {
   }
 
   if (job.status === 'error' && (job.error.match(/Upscaling videos is not supported/) || job.error.match(/Audio only/))) {
-    await ensembledb.dropencodingforjob(req.params.id)
+    try {
+      await ensembledb.dropencodingforjob(req.params.id)
+    } catch (e) {
+      // we couldn't drop it for some reason but we still need to report an error to ensemble
+    }
   }
 
   var root = xmlbuilder.create('JobStatusInfo')
