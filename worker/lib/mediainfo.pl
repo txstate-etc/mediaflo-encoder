@@ -61,6 +61,21 @@ if ($video) {
   $v->{language} = lc(target($video, 'Language', 2)) || $default_lang;
   $v->{default} = boolean($video, 'Default');
   $v->{forced} = boolean($video, 'Forced');
+  my $rotation = numeric($video, 'Rotation');
+  if (
+    ($rotation > 85 && $rotation < 95) ||
+    ($rotation > 265 && $rotation < 275) ||
+    ($rotation > -95 && $rotation < -85)
+  ) {
+    my $displaywidth = $v->{display_width};
+    $v->{display_width} = $v->{display_height};
+    $v->{display_height} = $displaywidth;
+    my $width = $v->{width};
+    $v->{width} = $v->{height};
+    $v->{height} = $width;
+    $v->{displayratio} = 1.0 / $v->{displayratio};
+  }
+  $v->{rotation} = numeric($video, 'Rotation');
   $ret->{video} = $v;
 }
 
