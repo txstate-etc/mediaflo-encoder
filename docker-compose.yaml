@@ -25,7 +25,6 @@ services:
       - ./sample_dest:/video_dest
   mariadb:
     image: mariadb
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_DATABASE: default_database
