@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "start:dev": "nodemon --exec npm start",
     "test": "test"
   },
   "repository": {
@@ -25,5 +26,8 @@
     "body-parser": "^1.19.0",
     "express-basic-auth": "^1.2.0",
     "uuid": "^8.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
   }
 }

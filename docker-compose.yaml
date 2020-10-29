@@ -3,6 +3,7 @@ services:
   loader:
     build:
       context: ./loader
+      dockerfile: Dockerfile.dev
     environment:
       NODE_ENV: development
       DB_HOST: mariadb

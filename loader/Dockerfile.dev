@@ -1,0 +1,9 @@
+FROM node:14-alpine
+WORKDIR /usr/src/app
+COPY package.json ./
+RUN npm install --quiet
+COPY index.js ./
+COPY lib lib
+COPY routes routes
+COPY presets.json presets.json
+CMD ["npm", "run", "start:dev"]
