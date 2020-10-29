@@ -8,6 +8,7 @@ require('./lib/resetjobs')
 app.get('/api/?$', async (req, res) => {
   res.status(200).send('OK')
 })
+app.use('/api/stats', require('./routes/stats.js'))
 
 const basicauthusers = {}
 basicauthusers[process.env.API_USER || 'apiuser'] = process.env.API_PASS || 'secret'

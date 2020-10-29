@@ -7,11 +7,14 @@ services:
     environment:
       NODE_ENV: development
       DB_HOST: mariadb
+    ports:
+      - 80:80
     links:
       - mariadb
     volumes:
       - ./loader/index.js:/usr/src/app/index.js
       - ./loader/lib:/usr/src/app/lib
+      - ./loader/routes:/usr/src/app/routes
   worker:
     build:
       context: ./worker

@@ -55,12 +55,12 @@ module.exports = async function () {
     await db.update('UPDATE version set id=?', version)
   }
 
-  // if (version === 4) {
-  //   version++
-  //   console.info('updating database to version ' + version)
-  //   await db.execute(`ALTER TABLE queue ...`)
-  //   await db.update('UPDATE version set id=?', version)
-  // }
+  if (version === 4) {
+     version++
+     console.info('updating database to version ' + version)
+     await db.execute(`CREATE INDEX job_created ON queue (job_created DESC)`)
+     await db.update('UPDATE version set id=?', version)
+  }
 
   console.debug('database version is ' + version)
 }
