@@ -19,13 +19,13 @@
   },
   "homepage": "https://github.com/txstate-etc/mediaflo-encoder#readme",
   "dependencies": {
-    "mssql-async": "^1.0.3",
-    "txstate-node-utils": "^2.8.18",
-    "xml2js": "^0.4.23",
-    "xmlbuilder": "^15.1.1",
     "body-parser": "^1.19.0",
     "express-basic-auth": "^1.2.0",
-    "uuid": "^8.3.0"
+    "mssql-async": "^1.0.10",
+    "txstate-node-utils": "^2.8.18",
+    "uuid": "^8.3.0",
+    "xml2js": "^0.4.23",
+    "xmlbuilder": "^15.1.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.6"
