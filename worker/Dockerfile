@@ -1,4 +1,4 @@
-FROM alpine:3.11 as handbrake
+FROM alpine:3.13 as handbrake
 WORKDIR /tmp
 # Compile HandBrake
 RUN \
@@ -17,6 +17,7 @@ RUN \
         jansson-dev \
         lame-dev \
         libass-dev \
+        libjpeg-turbo-dev \
         libsamplerate-dev \
         libtheora-dev \
         libtool \
@@ -32,7 +33,7 @@ RUN \
         numactl-dev \
         opus-dev \
         patch \
-        python \
+        python3 \
         speex-dev \
         tar \
         x264-dev \
@@ -49,7 +50,7 @@ RUN \
                 --launch
 
 # Build FFmpeg
-FROM alpine:3.11 as ffmpeg
+FROM alpine:3.13 as ffmpeg
 
 ARG FFMPEG_VERSION=4.2.2
 ARG PREFIX=/opt/ffmpeg
@@ -102,7 +103,7 @@ RUN cd /tmp/ffmpeg-${FFMPEG_VERSION} && \
   --prefix="${PREFIX}" && \
   make && make install && make distclean
 
-FROM node:14-alpine3.11
+FROM node:14-alpine3.13
 WORKDIR /usr/src/app
 RUN apk update && apk upgrade && \
     apk add mediainfo perl perl-mojolicious perl-json \
