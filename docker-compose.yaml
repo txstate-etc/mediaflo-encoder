@@ -6,11 +6,11 @@ services:
       dockerfile: Dockerfile.dev
     environment:
       NODE_ENV: development
-      DB_HOST: mariadb
+      DB_HOST: mysql
     ports:
       - 80:80
     links:
-      - mariadb
+      - mysql
     volumes:
       - ./loader/index.js:/usr/src/app/index.js
       - ./loader/lib:/usr/src/app/lib
@@ -20,15 +20,15 @@ services:
       context: ./worker
     environment:
       NODE_ENV: development
-      DB_HOST: mariadb
+      DB_HOST: mysql
     links:
-      - mariadb
+      - mysql
     volumes:
       - ./worker/index.js:/usr/src/app/index.js
       - ./sample_src:/video_src
       - ./sample_dest:/video_dest
-  mariadb:
-    image: mariadb
+  mysql:
+    image: percona:5
     environment:
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_DATABASE: default_database
