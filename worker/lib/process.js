@@ -38,7 +38,7 @@ function detectcrop (output) {
 }
 
 async function runcrop (cmd) {
-  const output = await exec(cmd)
+  const output = await exec(cmd, { timeout: 1000 * 60 * 5 })
   return detectcrop(output.stdout) || detectcrop(output.stderr) || { top: 0, bottom: 0, left: 0, right: 0 }
 }
 
@@ -175,13 +175,25 @@ module.exports = async (job) => {
     ])
 
     return new Promise((resolve, reject) => {
+      let lastProgress = 0, lastProgressAt = new Date()
+      let killed = false
+      const timer = setInterval(() => {
+        if (new Date() - lastProgressAt > 1000 * 60 * 5) {
+          killed = true
+          child.kill()
+        }
+      }, 1000 * 20)
       let output = ''
       child.stdout.on('data', chunk => {
         const line = chunk.toString('utf8')
         const m = line.match(/(\d+\.\d+)\s?%/i)
         if (Array.isArray(m) && m[0]) {
           const progress = parseFloat(m[0])
-          db.update('UPDATE queue SET percent_complete=?, encoding_lastupdated=NOW() WHERE id=?', progress, job.id).catch(err => console.warn(err))
+          if (progress > lastProgress) {
+            lastProgress = progress
+            lastProgressAt = new Date()
+          }
+          db.update('UPDATE queue SET percent_complete=?, encoding_lastupdated=NOW() WHERE id=?', [progress, job.id]).catch(err => console.warn(err))
         } else {
           output += line
         }
@@ -190,10 +202,11 @@ module.exports = async (job) => {
         output += chunk.toString('utf8')
       })
       child.on('close', (code) => {
-        if (code) {
-          console.error('Handbrake failure.', output, info)
-          reject(new Error('HandBrake returned failure code.'))
-        } else resolve()
+        clearInterval(timer)
+        if (killed || code) console.error('Handbrake failure.', output, info)
+        if (killed) return reject(new Error('HandBrake killed due to inactivity.'))
+        if (code) return reject(new Error('HandBrake returned failure code.'))
+        resolve()
       })
     })
   } else {
