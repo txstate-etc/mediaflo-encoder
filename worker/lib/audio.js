@@ -1,5 +1,5 @@
 const childprocess = require('child_process')
-const db = require('txstate-node-utils/lib/mysql')
+const db = require('mysql2-async/db').default
 const { UpscaleError } = require('./errors')
 
 module.exports = (job, info) => {
@@ -32,7 +32,7 @@ module.exports = (job, info) => {
         const seconds = parseInt(m[3]) + parseFloat('0.' + m[4])
         const total = hours * 3600 + minutes * 60 + seconds
         const progress = Math.round(10000.0 * total / duration) / 100
-        db.update('UPDATE queue SET percent_complete=?, encoding_lastupdated=NOW() WHERE id=?', progress, job.id).catch(err => console.warn(err))
+        db.update('UPDATE queue SET percent_complete=?, encoding_lastupdated=NOW() WHERE id=?', [progress, job.id]).catch(err => console.warn(err))
       } else {
         output += line
       }

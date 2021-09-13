@@ -4,7 +4,7 @@ const exec = util.promisify(childprocess.exec)
 const fsp = require('fs').promises
 const path = require('path')
 const crypto = require('crypto')
-const db = require('txstate-node-utils/lib/mysql')
+const db = require('mysql2-async/db').default
 const copy = require('cp-file')
 const { UpscaleError } = require('./errors')
 const processAudio = require('./audio')
@@ -109,7 +109,7 @@ module.exports = async (job) => {
       throw new UpscaleError('Upscaling videos is not supported.')
     }
   }
-  await db.update('UPDATE queue SET final_width=?, final_height=?, encoding_lastupdated=NOW() WHERE id=?', finalwidth, finalheight, job.id)
+  await db.update('UPDATE queue SET final_width=?, final_height=?, encoding_lastupdated=NOW() WHERE id=?', [finalwidth, finalheight, job.id])
 
   // if video is interlaced, let's figure out whether it is a true interlace or actually a telecine
   // telecine means we should --detelecine and set framerate to 23.976
@@ -155,7 +155,7 @@ module.exports = async (job) => {
   if (job.resolution > 800) aq = 3
   else if (job.resolution < 400) aq = 1
 
-  await db.update('UPDATE queue SET encoding_started=NOW(), encoding_lastupdated=NOW() WHERE id=?', job.id)
+  await db.update('UPDATE queue SET encoding_started=NOW(), encoding_lastupdated=NOW() WHERE id=?', [job.id])
   // determine whether encoding is necessary
   if (detelecine || deinterlace || info.format !== 'mp4' ||
       finalarea * 1.3 < originalarea ||
@@ -198,7 +198,7 @@ module.exports = async (job) => {
     })
   } else {
     return copy(inputpath, outputpath).on('progress', info => {
-      db.update('UPDATE queue SET percent_complete=?, encoding_lastupdated=NOW() WHERE id=?', info.percent * 100.0, job.id)
+      db.update('UPDATE queue SET percent_complete=?, encoding_lastupdated=NOW() WHERE id=?', [info.percent * 100.0, job.id])
     })
   }
 }
