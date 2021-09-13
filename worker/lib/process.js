@@ -165,11 +165,11 @@ module.exports = async (job) => {
     // encoding is necessary
     const child = childprocess.spawn('/HandBrakeCLI', [
       '-i', inputpath, '-o', outputpath,
-      '-f', 'mp4', '-m', '--optimize',
+      '-f', 'mp4', '-m', '--optimize', '--align-av',
       '--custom-anamorphic', '--pixel-aspect', '1:1', '--crop', `${top}:${bottom}:${left}:${right}`,
       '-w', finalwidth, '-l', finalheight, '--cfr', '--rate', finalfps,
       ...(detelecine ? ['--detelecine'] : []), ...(deinterlace ? ['--deinterlace=bob'] : []),
-      '-e', 'x264', '-q', '20', '-x', 'ref=3:weightp=0:b-pyramid=strict:b-adapt=2:me=umh:subme=7:rc-lookahead=40',
+      '-e', 'x264', '-q', '20', '-x', 'ref=3:weightp=0:b-pyramid=strict:b-adapt=2:me=umh:subme=7:level=4.0:8x8dct=0:vbv-bufsize=25000:vbv-maxrate=20000',
       '-a', '1', '-E', 'fdk_aac', '--aq', aq, '-6', 'dpl2',
       '--no-markers'
     ])
