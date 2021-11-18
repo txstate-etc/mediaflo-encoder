@@ -10,7 +10,7 @@ my $file = $ARGV[0];
 die('file does not exist') unless -e $file;
 my $xml = `mediainfo -f --Output=XML "$file"`;
 
-print $xml."\n" if $ARGV[1] eq '--debug';
+print STDERR $xml."\n" if $ARGV[1] eq '--debug';
 
 my $dom = Mojo::DOM->new($xml);
 my $ret = {};
@@ -76,6 +76,9 @@ if ($video) {
     $v->{displayratio} = 1.0 / $v->{displayratio};
   }
   $v->{rotation} = numeric($video, 'Rotation');
+  if (longest($video, 'Encoded_Library_Settings') =~ m/\bcrf=([\d\.]+)\b/) {
+    $v->{crf} = $1 + 0;
+  }
   $ret->{video} = $v;
 }
 

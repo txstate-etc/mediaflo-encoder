@@ -48,7 +48,7 @@ async function cropinfo (filepath, duration) {
     // aspect ratio as the rest of the content do not get cropped
     const stopat = Math.min(Math.floor(duration), 10)
     const testpath = path.resolve('/tmp', crypto.randomBytes(20).toString('hex')) + path.extname(filepath)
-    await exec(`/opt/ffmpeg/bin/ffmpeg -i "${filepath}" -ss 0 -t ${stopat} -c copy "${testpath}"`)
+    const output = await exec(`/opt/ffmpeg/bin/ffmpeg -i "${filepath}" -t ${stopat} -c copy "${testpath}"`)
     const introcrop = await runcrop(`/HandBrakeCLI -i "${testpath}" --scan --previews 10`)
     await fsp.unlink(testpath)
 
@@ -157,7 +157,7 @@ module.exports = async (job) => {
 
   await db.update('UPDATE queue SET encoding_started=NOW(), encoding_lastupdated=NOW() WHERE id=?', [job.id])
   // determine whether encoding is necessary
-  if (detelecine || deinterlace || info.format !== 'mp4' ||
+  if (detelecine || deinterlace || info.format !== 'mp4' || !info.video.crf ||
       finalarea * 1.3 < originalarea ||
       info.audio.length > 1 || (info.audio[0] || {}).format !== 'aac' ||
       !info.streamable || info.video.format !== 'avc' || info.video.vfr ||

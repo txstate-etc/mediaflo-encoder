@@ -52,7 +52,7 @@ RUN \
 # Build FFmpeg
 FROM alpine:3.14 as ffmpeg
 
-ARG FFMPEG_VERSION=4.2.2
+ARG FFMPEG_VERSION=4.4.1
 ARG PREFIX=/opt/ffmpeg
 
 # FFmpeg build dependencies.
@@ -62,7 +62,6 @@ RUN apk add --update \
   lame-dev \
   libvorbis-dev \
   libvpx-dev \
-  libwebp-dev \
   libtheora-dev \
   opus-dev \
   pkgconf \
@@ -107,7 +106,7 @@ FROM node:16-alpine3.14
 WORKDIR /usr/src/app
 RUN apk update && apk upgrade && \
     apk add mediainfo perl perl-mojolicious perl-json \
-    fribidi libass lame libjpeg-turbo-dev libsamplerate libtheora libvorbis libvpx x264-dev numactl opus speex jansson \
+    fribidi libass lame libjpeg-turbo-dev libogg libsamplerate libtheora libvorbis libvpx x264-dev numactl opus speex jansson \
     libxml2 xz
 COPY --from=handbrake /tmp/HandBrake/build/HandBrakeCLI /HandBrakeCLI
 COPY --from=ffmpeg /opt/ffmpeg /opt/ffmpeg
